@@ -1,6 +1,6 @@
 import "@/styles/globals.css";
-import Head from "next/head";
 import Simulator from "components/Simulator";
+import Head from "next/head";
 
 export default function App({ Component, pageProps }) {
   return (
