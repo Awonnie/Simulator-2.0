@@ -1,5 +1,4 @@
-import React from "react";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import QueryAPI from "./QueryAPI";
 
 const Direction = {
@@ -53,6 +52,60 @@ export default function Simulator() {
   const [path, setPath] = useState([]);
   const [commands, setCommands] = useState([]);
   const [page, setPage] = useState(0);
+
+  // New state variable for the timer
+  const [timer, setTimer] = useState(0);
+  const [timerRunning, setTimerRunning] = useState(false);
+  // Define timerInterval as a state variable
+const [timerInterval, setTimerInterval] = useState(null);
+
+// Function to start the timer
+const startTimer = () => {
+  if (!timerRunning) {
+    setTimerRunning(true);
+    setTimer((prevTimer) => prevTimer + 1);
+
+    // Set the timerInterval state with the interval ID
+    const intervalId = setInterval(() => {
+      setTimer((prevTimer) => prevTimer + 1);
+    }, 1000);
+
+    // Store the interval ID in timerInterval state
+    setTimerInterval(intervalId);
+  }
+};
+
+// Function to stop the timer
+const stopTimer = () => {
+  if (timerRunning) {
+    // Clear the interval using the stored interval ID
+    clearInterval(timerInterval);
+    setTimerRunning(false);
+  }
+};
+
+// Function to reset the timer
+const resetTimer = () => {
+  if (timerInterval) {
+    // Clear the interval using the stored interval ID
+    clearInterval(timerInterval);
+  }
+  setTimer(0);
+  setTimerRunning(false);
+};
+
+
+  // Function to format the timer value into HH:mm:ss format
+  const formatTimer = (seconds) => {
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const remainingSeconds = seconds % 60;
+  return `${padZero(hours)}:${padZero(minutes)}:${padZero(remainingSeconds)}`;
+  };
+
+  // Function to pad a number with leading zeros if it's less than 10
+  const padZero = (num) => (num < 10 ? `0${num}` : num);
+
 
   const generateNewID = () => {
     while (true) {
@@ -503,6 +556,24 @@ export default function Simulator() {
         </button>
         <button className="btn btn-success" onClick={compute}>
           Submit
+        </button>
+      </div>
+
+      {/* Timer display */}
+      <div className="text-center mt-4">
+        <h2 className="text-black">Timer: {formatTimer(timer)}</h2>
+      </div>
+      
+      {/* Timer controls */}
+      <div className="btn-group btn-group-horizontal py-4">
+        <button className="btn btn-success" onClick={startTimer}>
+          Start Timer
+        </button>
+        <button className="btn btn-warning" onClick={stopTimer}>
+          Stop Timer
+        </button>
+        <button className="btn btn-error" onClick={resetTimer}>
+          Reset Timer
         </button>
       </div>
 
