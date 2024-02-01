@@ -86,6 +86,7 @@ export default function Simulator() {
   const [isComputing, setIsComputing] = useState(false);
   const [path, setPath] = useState([]);
   const [commands, setCommands] = useState([]);
+  const [distance, setDistance] = useState(0); // Assuming distance is a numeric value
   const [page, setPage] = useState(0);
 
 
@@ -264,6 +265,7 @@ export default function Simulator() {
           commands.push(x);
         }
         setCommands(commands);
+        setDistance(data.data.distance); // Update this line to set the distance
       }
       // Set computing to false, release the lock
       setIsComputing(false);
@@ -693,6 +695,7 @@ const resetTimer = () => {
         <div className="w-1/4">
           <div className="flex flex-col items-center text-center bg-purple-100 p-4 rounded-xl shadow-md">
             <h2 className="text-xl font-semibold text-purple-700 mb-2">Path Commands</h2>
+            <h2 className="text-xl font-semibold">Distance: {distance}cm</h2>
             {path.map((_, index) => (
               <div key={index} className="text-purple-800 py-1">
                 {`Step ${index + 1}: ${commands[index]}`}
