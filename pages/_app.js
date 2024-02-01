@@ -1,3 +1,4 @@
+import "@/styles/custom-styles.css";
 import "@/styles/globals.css";
 import Simulator from "components/Simulator";
 import Head from "next/head";
