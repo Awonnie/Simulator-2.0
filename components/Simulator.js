@@ -34,6 +34,40 @@ function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
+function interpolatePath(path) {
+  let interpolatedPath = [];
+
+  for (let i = 0; i < path.length - 1; i++) {
+    const start = path[i];
+    const end = path[i + 1];
+    interpolatedPath.push(start);
+
+    // Calculate differences
+    const dx = end.x - start.x;
+    const dy = end.y - start.y;
+    const maxSteps = Math.max(Math.abs(dx), Math.abs(dy));
+    
+    // Calculate step increments
+    const stepX = dx / maxSteps;
+    const stepY = dy / maxSteps;
+
+    // Generate intermediate steps
+    for (let step = 1; step <= maxSteps; step++) {
+      interpolatedPath.push({
+        d: start.d, // Assume direction doesn't change, adjust as necessary
+        s: start.s,
+        x: start.x + stepX,
+        y: start.y + stepY
+      });
+    }
+  }
+
+  // Ensure the final position is included
+  interpolatedPath.push(path[path.length - 1]);
+
+  return interpolatedPath;
+}
+
 export default function Simulator() {
   const [robotState, setRobotState] = useState({
     x: 1,
@@ -52,59 +86,6 @@ export default function Simulator() {
   const [path, setPath] = useState([]);
   const [commands, setCommands] = useState([]);
   const [page, setPage] = useState(0);
-
-  // New state variable for the timer
-  const [timer, setTimer] = useState(0);
-  const [timerRunning, setTimerRunning] = useState(false);
-  // Define timerInterval as a state variable
-  const [timerInterval, setTimerInterval] = useState(null);
-
-// Function to start the timer
-const startTimer = () => {
-  if (!timerRunning) {
-    setTimerRunning(true);
-    setTimer((prevTimer) => prevTimer + 1);
-
-    // Set the timerInterval state with the interval ID
-    const intervalId = setInterval(() => {
-      setTimer((prevTimer) => prevTimer + 1);
-    }, 1000);
-
-    // Store the interval ID in timerInterval state
-    setTimerInterval(intervalId);
-  }
-};
-
-// Function to stop the timer
-const stopTimer = () => {
-  if (timerRunning) {
-    // Clear the interval using the stored interval ID
-    clearInterval(timerInterval);
-    setTimerRunning(false);
-  }
-};
-
-// Function to reset the timer
-const resetTimer = () => {
-  if (timerInterval) {
-    // Clear the interval using the stored interval ID
-    clearInterval(timerInterval);
-  }
-  setTimer(0);
-  setTimerRunning(false);
-};
-
-
-  // Function to format the timer value into HH:mm:ss format
-  const formatTimer = (seconds) => {
-  const hours = Math.floor(seconds / 3600);
-  const minutes = Math.floor((seconds % 3600) / 60);
-  const remainingSeconds = seconds % 60;
-  return `${padZero(hours)}:${padZero(minutes)}:${padZero(remainingSeconds)}`;
-  };
-
-  // Function to pad a number with leading zeros if it's less than 10
-  const padZero = (num) => (num < 10 ? `0${num}` : num);
 
 
   const generateNewID = () => {
@@ -421,6 +402,122 @@ const resetTimer = () => {
     return rows;
   };
 
+  const [newpath, setnewPath] = useState([]);
+  const [newpage, setnewPage] = useState(0); // Using page to track current step in the path
+  const [isAnimating, setIsAnimating] = useState(false);
+
+  // New state variable for the timer
+  const [timer, setTimer] = useState(0);
+  const [timerRunning, setTimerRunning] = useState(false);
+  // Define timerInterval as a state variable
+  const [timerInterval, setTimerInterval] = useState(null);
+
+// Function to start the timer
+const startTimer = () => {
+  if (!timerRunning) {
+    setTimerRunning(true);
+    setTimer((prevTimer) => prevTimer + 1);
+
+    // Set the timerInterval state with the interval ID
+    const intervalId = setInterval(() => {
+      setTimer((prevTimer) => prevTimer + 1);
+    }, 1000);
+
+    // Store the interval ID in timerInterval state
+    setTimerInterval(intervalId);
+  }
+};
+
+
+// Function to reset the timer
+const resetTimer = () => {
+  if (timerInterval) {
+    // Clear the interval using the stored interval ID
+    clearInterval(timerInterval);
+  }
+  setTimer(0);
+  setTimerRunning(false);
+};
+
+
+  // Function to format the timer value into HH:mm:ss format
+  const formatTimer = (seconds) => {
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const remainingSeconds = seconds % 60;
+  return `${padZero(hours)}:${padZero(minutes)}:${padZero(remainingSeconds)}`;
+  };
+
+  // Function to pad a number with leading zeros if it's less than 10
+  const padZero = (num) => (num < 10 ? `0${num}` : num);
+
+
+  useEffect(() => {
+    if (newpage >= newpath.length) {
+      setIsAnimating(false); // Stop the animation if we've reached the end of the path
+      return;
+    }
+    setRobotState(newpath[newpage]); // Update robot state based on the current step in the path
+  }, [newpage, newpath]);
+
+  // Start the animation
+  useEffect(() => {
+    // Function to stop the timer
+    const stopTimer = () => {
+      if (timerRunning) {
+        // Clear the interval using the stored interval ID
+        clearInterval(timerInterval);
+        setTimerRunning(false);
+      }
+    };
+
+    let animationInterval;
+
+    if (isAnimating) {
+      // Need to add Switch case here to vary movement depending on command 
+      // 1) Starting speed -> prof mentioned that when the robot start e.g. path == 0, then the speed is slower as compared to if path == 2
+      // 2) Stopping speed
+      // 3) Time taken to snap a picture
+      // 4) Turning command -> time taken to rotate?
+      // Consider adding one more variable to the path d,s,x,y to signal a change in direction or robot stopping and starting to properly mimic
+
+
+      animationInterval = setInterval(() => {
+        setnewPage(currentPage => {
+          if (currentPage < newpath.length - 1) {
+            return currentPage + 1;
+          } else {
+            clearInterval(animationInterval); // Stop the animation at the end
+            stopTimer();
+            return currentPage; // Keep at last step
+          }
+        });
+      }, 800); 
+    }
+    return () => {
+      clearInterval(animationInterval); 
+    };
+  }, [isAnimating, newpath.length, timerInterval, timerRunning]);
+
+  // Function to start the animation
+  const startAnimation = () => {
+    setnewPath(interpolatePath(path));
+    if (newpath.length > 0 && !isAnimating) {
+      setnewPage(0); // Reset to start position before animating
+      setIsAnimating(true); // Start the animation
+      startTimer();
+    }
+  };
+
+  // Function to clear the animation
+  const clearAnimation = () => {
+      setnewPage(0); // Reset to start position before animating
+      setIsAnimating(false); // Start the animation
+      resetTimer();
+  };
+  
+
+
   useEffect(() => {
     if (page >= path.length) return;
     setRobotState(path[page]);
@@ -563,18 +660,18 @@ const resetTimer = () => {
       <div className="text-center mt-4">
         <h2 className="text-black">Timer: {formatTimer(timer)}</h2>
       </div>
-      
-      {/* Timer controls */}
+
+      {/* Animation controls */}
       <div className="btn-group btn-group-horizontal py-4">
-        <button className="btn btn-success" onClick={startTimer}>
-          Start Timer
+
+        <button className="btn btn-primary" onClick={startAnimation}>
+          Start Animation
         </button>
-        <button className="btn btn-warning" onClick={stopTimer}>
-          Stop Timer
+
+        <button className="btn btn-danger" onClick={clearAnimation}>
+          Clear Animation
         </button>
-        <button className="btn btn-error" onClick={resetTimer}>
-          Reset Timer
-        </button>
+
       </div>
 
       {path.length > 0 && (
