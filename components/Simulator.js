@@ -57,7 +57,7 @@ export default function Simulator() {
   const [timer, setTimer] = useState(0);
   const [timerRunning, setTimerRunning] = useState(false);
   // Define timerInterval as a state variable
-const [timerInterval, setTimerInterval] = useState(null);
+  const [timerInterval, setTimerInterval] = useState(null);
 
 // Function to start the timer
 const startTimer = () => {
