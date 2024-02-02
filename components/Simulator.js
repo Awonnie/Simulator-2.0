@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import QueryAPI from "./QueryAPI";
 
-
 const Direction = {
   NORTH: 0,
   EAST: 2,
@@ -47,7 +46,7 @@ function interpolatePath(path) {
     const dx = end.x - start.x;
     const dy = end.y - start.y;
     const maxSteps = Math.max(Math.abs(dx), Math.abs(dy));
-    
+
     // Calculate step increments
     const stepX = dx / maxSteps;
     const stepY = dy / maxSteps;
@@ -58,7 +57,7 @@ function interpolatePath(path) {
         d: start.d, // Assume direction doesn't change, adjust as necessary
         s: start.s,
         x: start.x + stepX,
-        y: start.y + stepY
+        y: start.y + stepY,
       });
     }
   }
@@ -88,7 +87,7 @@ export default function Simulator() {
   const [commands, setCommands] = useState([]);
   const [distance, setDistance] = useState(0); // Assuming distance is a numeric value
   const [page, setPage] = useState(0);
-
+  const [path_duration, setPathDuration] = useState([]);
 
   const generateNewID = () => {
     while (true) {
@@ -255,6 +254,10 @@ export default function Simulator() {
       if (data) {
         // If the data is valid, set the path
         setPath(data.data.path);
+
+        // Path duration contains a list of the duration of each step
+        setPathDuration(data.data.path_time);
+
         // Set the commands
         const commands = [];
         for (let x of data.data.commands) {
@@ -415,45 +418,51 @@ export default function Simulator() {
   // Define timerInterval as a state variable
   const [timerInterval, setTimerInterval] = useState(null);
 
-// Function to start the timer
-const startTimer = () => {
-  if (!timerRunning) {
-    setTimerRunning(true);
-    setTimer((prevTimer) => prevTimer + 1);
-
-    // Set the timerInterval state with the interval ID
-    const intervalId = setInterval(() => {
+  // Function to start the timer
+  const startTimer = () => {
+    if (!timerRunning) {
+      setTimerRunning(true);
       setTimer((prevTimer) => prevTimer + 1);
-    }, 1000);
 
-    // Store the interval ID in timerInterval state
-    setTimerInterval(intervalId);
-  }
-};
+      // Set the timerInterval state with the interval ID
+      const intervalId = setInterval(() => {
+        setTimer((prevTimer) => prevTimer + 1);
+      }, 1000);
 
+      // Store the interval ID in timerInterval state
+      setTimerInterval(intervalId);
+    }
+  };
 
-// Function to reset the timer
-const resetTimer = () => {
-  if (timerInterval) {
-    // Clear the interval using the stored interval ID
-    clearInterval(timerInterval);
-  }
-  setTimer(0);
-  setTimerRunning(false);
-};
+  // Function to stop the timer
+  const stopTimer = () => {
+    if (timerRunning) {
+      // Clear the interval using the stored interval ID
+      clearInterval(timerInterval);
+      setTimerRunning(false);
+    }
+  };
 
+  // Function to reset the timer
+  const resetTimer = () => {
+    if (timerInterval) {
+      // Clear the interval using the stored interval ID
+      clearInterval(timerInterval);
+    }
+    setTimer(0);
+    setTimerRunning(false);
+  };
 
   // Function to format the timer value into HH:mm:ss format
   const formatTimer = (seconds) => {
-  const hours = Math.floor(seconds / 3600);
-  const minutes = Math.floor((seconds % 3600) / 60);
-  const remainingSeconds = seconds % 60;
-  return `${padZero(hours)}:${padZero(minutes)}:${padZero(remainingSeconds)}`;
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const remainingSeconds = seconds % 60;
+    return `${padZero(hours)}:${padZero(minutes)}:${padZero(remainingSeconds)}`;
   };
 
   // Function to pad a number with leading zeros if it's less than 10
   const padZero = (num) => (num < 10 ? `0${num}` : num);
-
 
   useEffect(() => {
     if (newpage >= newpath.length) {
@@ -465,28 +474,18 @@ const resetTimer = () => {
 
   // Start the animation
   useEffect(() => {
-    // Function to stop the timer
-    const stopTimer = () => {
-      if (timerRunning) {
-        // Clear the interval using the stored interval ID
-        clearInterval(timerInterval);
-        setTimerRunning(false);
-      }
-    };
-
     let animationInterval;
 
     if (isAnimating) {
-      // Need to add Switch case here to vary movement depending on command 
+      // Need to add Switch case here to vary movement depending on command
       // 1) Starting speed -> prof mentioned that when the robot start e.g. path == 0, then the speed is slower as compared to if path == 2
       // 2) Stopping speed
       // 3) Time taken to snap a picture
       // 4) Turning command -> time taken to rotate?
       // Consider adding one more variable to the path d,s,x,y to signal a change in direction or robot stopping and starting to properly mimic
 
-
       animationInterval = setInterval(() => {
-        setnewPage(currentPage => {
+        setnewPage((currentPage) => {
           if (currentPage < newpath.length - 1) {
             return currentPage + 1;
           } else {
@@ -495,48 +494,64 @@ const resetTimer = () => {
             return currentPage; // Keep at last step
           }
         });
-      }, 800); 
+      }, 800);
     }
     return () => {
-      clearInterval(animationInterval); 
+      clearInterval(animationInterval);
     };
   }, [isAnimating, newpath.length, timerInterval, timerRunning]);
 
+  async function sleep(seconds) {
+    return new Promise((resolve) => setTimeout(resolve, seconds * 1000));
+  }
+
   // Function to start the animation
-  const startAnimation = () => {
-    setnewPath(interpolatePath(path));
-    if (newpath.length > 0 && !isAnimating) {
-      setnewPage(0); // Reset to start position before animating
-      setIsAnimating(true); // Start the animation
-      startTimer();
+  const startAnimation = async () => {
+    // setnewPath(interpolatePath(path));
+    // if (newpath.length > 0 && !isAnimating) {
+    //   setnewPage(0); // Reset to start position before animating
+    //   setIsAnimating(true); // Start the animation
+    //   startTimer();
+    // }
+    startTimer();
+    console.log(path_duration);
+    for (let i = 0; i < path_duration.length; i++) {
+      await sleep(path_duration[i]);
+      setPage(i);
+      if (i + 1 == +path_duration.length) stopTimer();
     }
   };
 
   // Function to clear the animation
   const clearAnimation = () => {
-      setnewPage(0); // Reset to start position before animating
-      setIsAnimating(false); // Start the animation
-      resetTimer();
+    // setnewPage(0); // Reset to start position before animating
+    setIsAnimating(false); // Start the animation
+    resetTimer();
+    setRobotX(1);
+    setRobotDir(0);
+    setRobotY(1);
+    setRobotState({ x: 1, y: 1, d: Direction.NORTH, s: -1 });
+    setPage(0);
   };
-  
-
 
   useEffect(() => {
     if (page >= path.length) return;
     setRobotState(path[page]);
   }, [page, path]);
 
-  
-
   return (
     <div className="flex flex-col items-center justify-center p-6 bg-gray-50">
       <div className="text-center mb-8">
-        <h2 className="text-2xl font-bold text-purple-700">MDP AY23/24 Group 7 Algorithm Simulator</h2>
+        <h2 className="text-2xl font-bold text-purple-700">
+          MDP AY23/24 Group 7 Algorithm Simulator
+        </h2>
       </div>
 
       <div className="bg-white rounded-xl shadow-xl mb-8 p-4 w-full max-w-4xl">
         <div className="card-body items-center text-center p-4">
-          <h2 className="text-xl font-semibold text-purple-700">Robot Position</h2>
+          <h2 className="text-xl font-semibold text-purple-700">
+            Robot Position
+          </h2>
           <div className="form-control mt-4">
             <label className="input-group input-group-horizontal">
               <span className="bg-purple-500 text-white p-2 rounded-l">X</span>
@@ -568,7 +583,10 @@ const resetTimer = () => {
                 <option value={ObDirection.WEST}>Left</option>
                 <option value={ObDirection.EAST}>Right</option>
               </select>
-              <button className="btn bg-purple-600 hover:bg-purple-700 text-white p-2 rounded-r" onClick={onClickRobot}>
+              <button
+                className="btn bg-purple-600 hover:bg-purple-700 text-white p-2 rounded-r"
+                onClick={onClickRobot}
+              >
                 Set
               </button>
             </label>
@@ -578,51 +596,65 @@ const resetTimer = () => {
 
       <div className="bg-white rounded-xl shadow-xl mb-8 p-4 w-full max-w-4xl">
         <div className="card-body items-center text-center p-4">
-          <h2 className="text-xl font-semibold text-purple-700">Add Obstacles</h2>
+          <h2 className="text-xl font-semibold text-purple-700">
+            Add Obstacles
+          </h2>
           <div className="form-control mt-4">
             <label className="input-group">
               <span className="bg-purple-500 text-white p-2 rounded-l">X</span>
-              <input 
+              <input
                 onChange={onChangeX}
                 type="number"
                 placeholder="1"
                 min="0"
                 max="19"
-                className="input input-bordered text-purple-900"/>
+                className="input input-bordered text-purple-900"
+              />
               <span className="bg-purple-500 text-white p-2">Y</span>
-              <input 
+              <input
                 onChange={onChangeY}
                 type="number"
                 placeholder="1"
                 min="0"
                 max="19"
-                className="input input-bordered text-purple-900"/>
+                className="input input-bordered text-purple-900"
+              />
               <span className="bg-purple-500 text-white p-2">D</span>
-              <select  
+              <select
                 onChange={onDirectionInputChange}
                 value={directionInput}
-                className="select select-bordered text-purple-900">
+                className="select select-bordered text-purple-900"
+              >
                 <option value={ObDirection.NORTH}>Up</option>
                 <option value={ObDirection.SOUTH}>Down</option>
                 <option value={ObDirection.WEST}>Left</option>
                 <option value={ObDirection.EAST}>Right</option>
                 <option value={ObDirection.SKIP}>None</option>
               </select>
-              <button className="btn bg-purple-600 hover:bg-purple-700 text-white p-2 rounded-r" onClick={onClickObstacle}>Add</button>
+              <button
+                className="btn bg-purple-600 hover:bg-purple-700 text-white p-2 rounded-r"
+                onClick={onClickObstacle}
+              >
+                Add
+              </button>
             </label>
           </div>
         </div>
-    </div>
+      </div>
 
-    <div className="grid grid-cols-4 gap-4 p-4">
+      <div className="grid grid-cols-4 gap-4 p-4">
         {obstacles.map((ob) => {
           return (
             <div
-              key={ob} className="flex justify-between items-center bg-white rounded-lg shadow-md p-3 border border-purple-300">
-              <div flex flex-col  className="text-purple-800">
+              key={ob}
+              className="flex justify-between items-center bg-white rounded-lg shadow-md p-3 border border-purple-300"
+            >
+              <div flex flex-col className="text-purple-800">
                 <div className="font-semibold">X: {ob.x}</div>
                 <div className="font-semibold">Y: {ob.y}</div>
-                <div className="font-semibold">D: {DirectionToString[ob.d]}</div>
+                <div className="font-semibold">
+                  D: {DirectionToString[ob.d]}
+                </div>
               </div>
               <div>
                 <svg
@@ -630,13 +662,14 @@ const resetTimer = () => {
                   fill="none"
                   viewBox="0 0 24 24"
                   className="inline-block w-4 h-4 stroke-current"
-                  onClick={() => onRemoveObstacle(ob)}>
+                  onClick={() => onRemoveObstacle(ob)}
+                >
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth="2"
                     d="M6 18L18 6M6 6l12 12"
-                  ></path> 
+                  ></path>
                 </svg>
               </div>
             </div>
@@ -644,49 +677,58 @@ const resetTimer = () => {
         })}
       </div>
 
-
       <div className="py-4 flex justify-center gap-4">
-      <button className="bg-gradient-to-r from-purple-600 to-purple-700 text-white font-bold py-2 px-4 rounded shadow-lg hover:from-purple-700 hover:to-purple-800 focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-opacity-50 transition duration-150 ease-in-out"
-        onClick={onResetAll}>
-        Reset All
-      </button>
-      <button className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white font-bold py-2 px-4 rounded shadow-lg hover:from-yellow-600 hover:to-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
-        onClick={onReset}>
-        Reset Robot
-      </button>
-      <button className="bg-gradient-to-r from-green-500 to-green-600 text-white font-bold py-2 px-4 rounded shadow-lg hover:from-green-600 hover:to-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
-        onClick={compute}>
-        Submit
-      </button>
-    </div>
-
+        <button
+          className="bg-gradient-to-r from-purple-600 to-purple-700 text-white font-bold py-2 px-4 rounded shadow-lg hover:from-purple-700 hover:to-purple-800 focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-opacity-50 transition duration-150 ease-in-out"
+          onClick={onResetAll}
+        >
+          Reset All
+        </button>
+        <button
+          className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white font-bold py-2 px-4 rounded shadow-lg hover:from-yellow-600 hover:to-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
+          onClick={onReset}
+        >
+          Reset Robot
+        </button>
+        <button
+          className="bg-gradient-to-r from-green-500 to-green-600 text-white font-bold py-2 px-4 rounded shadow-lg hover:from-green-600 hover:to-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
+          onClick={compute}
+        >
+          Submit
+        </button>
+      </div>
 
       {/* Timer display */}
       <div className="text-center mt-4">
-        <h2 className="font-semibold text-xl text-purple-700">Timer: <span className="text-purple-500">{formatTimer(timer)}</span></h2>
+        <h2 className="font-semibold text-xl text-purple-700">
+          Timer: <span className="text-purple-500">{formatTimer(timer)}</span>
+        </h2>
       </div>
-
 
       {/* Animation controls */}
       <div className="flex justify-center gap-4 py-4">
-        <button className="bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold py-2 px-4 rounded shadow-lg hover:from-blue-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
-          onClick={startAnimation}>
+        <button
+          className="bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold py-2 px-4 rounded shadow-lg hover:from-blue-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
+          onClick={startAnimation}
+        >
           Start Animation
         </button>
 
-        <button className="bg-gradient-to-r from-red-500 to-red-600 text-white font-bold py-2 px-4 rounded shadow-lg hover:from-red-600 hover:to-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
-          onClick={clearAnimation}>
+        <button
+          className="bg-gradient-to-r from-red-500 to-red-600 text-white font-bold py-2 px-4 rounded shadow-lg hover:from-red-600 hover:to-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
+          onClick={clearAnimation}
+        >
           Clear Animation
         </button>
       </div>
-
 
       <div className="flex flex-row w-full max-w-6xl">
         {/* Grid */}
         <div className="w-3/4 pr-4">
           <table className="border-collapse border border-purple-500 w-full text-sm">
             <tbody>
-              {renderGrid()} {/* Ensure this function outputs rows and cells with appropriate styling */}
+              {renderGrid()}{" "}
+              {/* Ensure this function outputs rows and cells with appropriate styling */}
             </tbody>
           </table>
         </div>
@@ -694,7 +736,9 @@ const resetTimer = () => {
         {/* List of path commands */}
         <div className="w-1/4">
           <div className="flex flex-col items-center text-center bg-purple-100 p-4 rounded-xl shadow-md">
-            <h2 className="text-xl font-semibold text-purple-700 mb-2">Path Commands</h2>
+            <h2 className="text-xl font-semibold text-purple-700 mb-2">
+              Path Commands
+            </h2>
             <h2 className="text-xl font-semibold">Distance: {distance}cm</h2>
             {path.map((_, index) => (
               <div key={index} className="text-purple-800 py-1">
@@ -704,7 +748,6 @@ const resetTimer = () => {
           </div>
         </div>
       </div>
-
     </div>
   );
 }
