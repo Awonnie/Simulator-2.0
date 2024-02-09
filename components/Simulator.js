@@ -418,7 +418,6 @@ export default function Simulator() {
   };
 
   const [newpath, setnewPath] = useState([]);
-  const [isAnimating, setIsAnimating] = useState(false);
 
   // New state variable for the timer
   const [timer, setTimer] = useState(0);
@@ -487,14 +486,8 @@ export default function Simulator() {
   // Function to start the animation
   const startAnimation = async () => {
     startTimer();
-    setIsAnimating(true);
-    console.log("isAnimating=",isAnimating);
     console.log(path_duration);
     for (let i = 0; i < path_duration.length; i++) {
-      if (isAnimating==false)
-      {
-        break;
-      }
       await sleep(path_duration[i]);
       setPage(i);
       if (i + 1 == +path_duration.length) stopTimer();
@@ -509,7 +502,6 @@ export default function Simulator() {
     setRobotY(1);
     setRobotState({ x: 1, y: 1, d: Direction.NORTH, s: -1 });
     setPage(0);
-    setIsAnimating(false);
   };
 
   useEffect(() => {
