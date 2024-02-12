@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import QueryAPI from "./QueryAPI";
 
 const Direction = {
@@ -89,6 +89,7 @@ export default function Simulator() {
   const [page, setPage] = useState(0);
   const [path_duration, setPathDuration] = useState([]);
   const [duration, setDuration] = useState(0);
+  const isAnimating = useRef(false);
 
   const generateNewID = () => {
     while (true) {
@@ -255,7 +256,6 @@ export default function Simulator() {
       if (data) {
         // If the data is valid, set the path
         setPath(data.data.path);
-        setnewPath(interpolatePath(path));
         
         console.log("Path:",path);
         console.log("New path:",newpath);
@@ -485,17 +485,23 @@ export default function Simulator() {
 
   // Function to start the animation
   const startAnimation = async () => {
+    isAnimating.current = true;
     startTimer();
     console.log(path_duration);
     for (let i = 0; i < path_duration.length; i++) {
+      if (!isAnimating.current){
+        setPage(0);
+        break;
+      }
       await sleep(path_duration[i]);
-      setPage(i);
+      setPage(i)
       if (i + 1 == +path_duration.length) stopTimer();
     }
   };
 
   // Function to clear the animation
   const clearAnimation = () => {
+    isAnimating.current = false;
     resetTimer();
     setRobotX(1);
     setRobotDir(0);
@@ -507,6 +513,7 @@ export default function Simulator() {
   useEffect(() => {
     if (page >= path.length) return;
     setRobotState(path[page]);
+    setnewPath(interpolatePath(path));
   }, [page, path]);
 
 
