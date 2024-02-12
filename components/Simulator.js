@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import QueryAPI from "./QueryAPI";
 
 const Direction = {
@@ -56,8 +56,8 @@ function interpolatePath(path) {
       interpolatedPath.push({
         d: start.d, // Assume direction doesn't change, adjust as necessary
         s: start.s,
-        x: start.x + stepX,
-        y: start.y + stepY,
+        x: start.x + stepX * step, 
+        y: start.y + stepY * step, 
       });
     }
   }
@@ -88,6 +88,8 @@ export default function Simulator() {
   const [distance, setDistance] = useState(0); // Assuming distance is a numeric value
   const [page, setPage] = useState(0);
   const [path_duration, setPathDuration] = useState([]);
+  const [duration, setDuration] = useState(0);
+  const isAnimating = useRef(false);
 
   const generateNewID = () => {
     while (true) {
@@ -254,9 +256,15 @@ export default function Simulator() {
       if (data) {
         // If the data is valid, set the path
         setPath(data.data.path);
+        
+        console.log("Path:",path);
+        console.log("New path:",newpath);
 
         // Path duration contains a list of the duration of each step
         setPathDuration(data.data.path_time);
+
+        // Total Duration of the entire path
+        setDuration(data.data.duration);
 
         // Set the commands
         const commands = [];
@@ -274,6 +282,7 @@ export default function Simulator() {
       setIsComputing(false);
     });
   };
+
 
   const onResetAll = () => {
     // Reset all the states
@@ -409,8 +418,6 @@ export default function Simulator() {
   };
 
   const [newpath, setnewPath] = useState([]);
-  const [newpage, setnewPage] = useState(0); // Using page to track current step in the path
-  const [isAnimating, setIsAnimating] = useState(false);
 
   // New state variable for the timer
   const [timer, setTimer] = useState(0);
@@ -464,68 +471,37 @@ export default function Simulator() {
   // Function to pad a number with leading zeros if it's less than 10
   const padZero = (num) => (num < 10 ? `0${num}` : num);
 
-  useEffect(() => {
-    if (newpage >= newpath.length) {
-      setIsAnimating(false); // Stop the animation if we've reached the end of the path
-      return;
-    }
-    setRobotState(newpath[newpage]); // Update robot state based on the current step in the path
-  }, [newpage, newpath]);
-
-  // Start the animation
-  useEffect(() => {
-    let animationInterval;
-
-    if (isAnimating) {
-      // Need to add Switch case here to vary movement depending on command
-      // 1) Starting speed -> prof mentioned that when the robot start e.g. path == 0, then the speed is slower as compared to if path == 2
-      // 2) Stopping speed
-      // 3) Time taken to snap a picture
-      // 4) Turning command -> time taken to rotate?
-      // Consider adding one more variable to the path d,s,x,y to signal a change in direction or robot stopping and starting to properly mimic
-
-      animationInterval = setInterval(() => {
-        setnewPage((currentPage) => {
-          if (currentPage < newpath.length - 1) {
-            return currentPage + 1;
-          } else {
-            clearInterval(animationInterval); // Stop the animation at the end
-            stopTimer();
-            return currentPage; // Keep at last step
-          }
-        });
-      }, 800);
-    }
-    return () => {
-      clearInterval(animationInterval);
-    };
-  }, [isAnimating, newpath.length, timerInterval, timerRunning]);
 
   async function sleep(seconds) {
     return new Promise((resolve) => setTimeout(resolve, seconds * 1000));
   }
 
+  const startImmediate = async () => {
+      for (let i = 0; i < newpath.length; i++) {
+        await sleep(0.02);
+        setRobotState(newpath[i]);
+      }
+    }
+
   // Function to start the animation
   const startAnimation = async () => {
-    // setnewPath(interpolatePath(path));
-    // if (newpath.length > 0 && !isAnimating) {
-    //   setnewPage(0); // Reset to start position before animating
-    //   setIsAnimating(true); // Start the animation
-    //   startTimer();
-    // }
+    isAnimating.current = true;
     startTimer();
     console.log(path_duration);
     for (let i = 0; i < path_duration.length; i++) {
+      if (!isAnimating.current){
+        setPage(0);
+        break;
+      }
       await sleep(path_duration[i]);
-      setPage(i);
+      setPage(i)
       if (i + 1 == +path_duration.length) stopTimer();
     }
   };
 
   // Function to clear the animation
   const clearAnimation = () => {
-    // setnewPage(0); // Reset to start position before animating
-    setIsAnimating(false); // Start the animation
+    isAnimating.current = false;
     resetTimer();
     setRobotX(1);
     setRobotDir(0);
@@ -537,7 +513,9 @@ export default function Simulator() {
   useEffect(() => {
     if (page >= path.length) return;
     setRobotState(path[page]);
+    setnewPath(interpolatePath(path));
   }, [page, path]);
+
 
   return (
     <div className="flex flex-col items-center justify-center p-6 bg-gray-50">
@@ -576,8 +554,7 @@ export default function Simulator() {
               <select
                 onChange={onRobotDirectionInputChange}
                 value={robotDir}
-                className="select select-bordered text-purple-900"
-              >
+                className="select select-bordered text-purple-900">
                 <option value={ObDirection.NORTH}>Up</option>
                 <option value={ObDirection.SOUTH}>Down</option>
                 <option value={ObDirection.WEST}>Left</option>
@@ -585,8 +562,7 @@ export default function Simulator() {
               </select>
               <button
                 className="btn bg-purple-600 hover:bg-purple-700 text-white p-2 rounded-r"
-                onClick={onClickRobot}
-              >
+                onClick={onClickRobot}>
                 Set
               </button>
             </label>
@@ -633,8 +609,7 @@ export default function Simulator() {
               </select>
               <button
                 className="btn bg-purple-600 hover:bg-purple-700 text-white p-2 rounded-r"
-                onClick={onClickObstacle}
-              >
+                onClick={onClickObstacle}>
                 Add
               </button>
             </label>
@@ -647,14 +622,11 @@ export default function Simulator() {
           return (
             <div
               key={ob}
-              className="flex justify-between items-center bg-white rounded-lg shadow-md p-3 border border-purple-300"
-            >
+              className="flex justify-between items-center bg-white rounded-lg shadow-md p-3 border border-purple-300">
               <div flex flex-col className="text-purple-800">
                 <div className="font-semibold">X: {ob.x}</div>
                 <div className="font-semibold">Y: {ob.y}</div>
-                <div className="font-semibold">
-                  D: {DirectionToString[ob.d]}
-                </div>
+                <div className="font-semibold">D: {DirectionToString[ob.d]}</div>
               </div>
               <div>
                 <svg
@@ -662,8 +634,7 @@ export default function Simulator() {
                   fill="none"
                   viewBox="0 0 24 24"
                   className="inline-block w-4 h-4 stroke-current"
-                  onClick={() => onRemoveObstacle(ob)}
-                >
+                  onClick={() => onRemoveObstacle(ob)}>
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -680,22 +651,22 @@ export default function Simulator() {
       <div className="py-4 flex justify-center gap-4">
         <button
           className="bg-gradient-to-r from-purple-600 to-purple-700 text-white font-bold py-2 px-4 rounded shadow-lg hover:from-purple-700 hover:to-purple-800 focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-opacity-50 transition duration-150 ease-in-out"
-          onClick={onResetAll}
-        >
+          onClick={onResetAll}>
           Reset All
         </button>
+
         <button
           className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white font-bold py-2 px-4 rounded shadow-lg hover:from-yellow-600 hover:to-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
-          onClick={onReset}
-        >
+          onClick={onReset}>
           Reset Robot
         </button>
+
         <button
           className="bg-gradient-to-r from-green-500 to-green-600 text-white font-bold py-2 px-4 rounded shadow-lg hover:from-green-600 hover:to-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
-          onClick={compute}
-        >
+          onClick={compute}>
           Submit
         </button>
+
       </div>
 
       {/* Timer display */}
@@ -707,18 +678,23 @@ export default function Simulator() {
 
       {/* Animation controls */}
       <div className="flex justify-center gap-4 py-4">
+
         <button
           className="bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold py-2 px-4 rounded shadow-lg hover:from-blue-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
-          onClick={startAnimation}
-        >
+          onClick={startImmediate}>
+          Immediate
+        </button>
+
+        <button
+          className="bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold py-2 px-4 rounded shadow-lg hover:from-blue-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
+          onClick={startAnimation}>
           Start Animation
         </button>
 
         <button
           className="bg-gradient-to-r from-red-500 to-red-600 text-white font-bold py-2 px-4 rounded shadow-lg hover:from-red-600 hover:to-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
-          onClick={clearAnimation}
-        >
-          Clear Animation
+          onClick={clearAnimation}>
+          Clear 
         </button>
       </div>
 
@@ -739,7 +715,6 @@ export default function Simulator() {
             <h2 className="text-xl font-semibold text-purple-700 mb-2">
               Path Commands
             </h2>
-            <h2 className="text-xl font-semibold">Distance: {distance}cm</h2>
             {path.map((_, index) => (
               <div key={index} className="text-purple-800 py-1">
                 {`Step ${index + 1}: ${commands[index]}`}
@@ -747,6 +722,18 @@ export default function Simulator() {
             ))}
           </div>
         </div>
+
+        {/* For last checkpoint */}
+        <div className="w-1/4">
+          <div className="flex flex-col items-center text-center bg-purple-100 p-4 rounded-xl shadow-md">
+            <h2 className="text-xl font-semibold text-purple-700 mb-2">
+              Fastest Path
+            </h2>
+            <h2 className="text-xl font-semibold">Distance: {distance}cm</h2>
+            <h2 className="text-xl font-semibold">Timing: {duration}s</h2>
+          </div>
+        </div>
+
       </div>
     </div>
   );
