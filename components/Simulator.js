@@ -265,7 +265,10 @@ export default function Simulator() {
 
         // Total Duration of the entire path
         setDuration(data.data.duration);
+        setDistance(data.data.distance); // Update this line to set the distance
 
+        console.log("Distance:",distance);
+        console.log("Duration:",duration);
         // Set the commands
         const commands = [];
         for (let x of data.data.commands) {
@@ -276,7 +279,6 @@ export default function Simulator() {
           commands.push(x);
         }
         setCommands(commands);
-        setDistance(data.data.distance); // Update this line to set the distance
       }
       // Set computing to false, release the lock
       setIsComputing(false);
@@ -715,7 +717,7 @@ export default function Simulator() {
             <h2 className="text-xl font-semibold text-purple-700 mb-2">
               Path Commands
             </h2>
-            {path.map((_, index) => (
+            {commands.map((_, index) => (
               <div key={index} className="text-purple-800 py-1">
                 {`Step ${index + 1}: ${commands[index]}`}
               </div>
