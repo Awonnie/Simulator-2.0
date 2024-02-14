@@ -715,7 +715,7 @@ export default function Simulator() {
             <h2 className="text-xl font-semibold text-purple-700 mb-2">
               Path Commands
             </h2>
-            {path.map((_, index) => (
+            {commands.map((_, index) => (
               <div key={index} className="text-purple-800 py-1">
                 {`Step ${index + 1}: ${commands[index]}`}
               </div>
