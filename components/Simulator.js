@@ -172,6 +172,7 @@ export default function Simulator() {
 
     //If config is empty
     if (!haveConfig.current) {
+      console.log("For some reason, have config is still false");
       newConfigs[configName] = obstacles;
       haveConfig.current = true;
       setConfigurations(newConfigs);
@@ -196,9 +197,13 @@ export default function Simulator() {
       }
 
       if (itExists) {
-        if (name === configName) return; //If it exists and the name is the same, you dont need to save, can just return
+        if (name === configName) {
+          console.log("Name exists...");
+          return;
+        } //If it exists and the name is the same, you dont need to save, can just return
 
         //If it exists and the name is different, you need to update the name
+        console.log("Updating name...");
         delete newConfigs[name];
         break;
       }
@@ -677,6 +682,7 @@ export default function Simulator() {
                   type="text"
                   className="w-full rounded-md m-1 text-center text-gray-900 hover:shadow-inner focus:outline-none"
                   value={configName}
+                  placeholder={configName}
                   onChange={(e) => setConfigName(e.target.value)}
                 />
               </div>
@@ -694,7 +700,7 @@ export default function Simulator() {
 
       {/* Configurations Loader */}
       <Configurations
-        obs={obstacles}
+        setConfigName={setConfigName}
         setObs={setObstacles}
         haveConfig={haveConfig}
         configs={configurations}

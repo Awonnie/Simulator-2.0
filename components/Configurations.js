@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 
 export default function Configurations({
-  obs,
+  setConfigName,
   setObs,
   haveConfig,
   configs,
@@ -14,8 +14,6 @@ export default function Configurations({
     if (configList) {
       setConfigs(configList);
       haveConfig.current = true;
-    } else {
-      haveConfig.current = false;
     }
   }, []);
 
@@ -26,8 +24,9 @@ export default function Configurations({
     }
   }, [configs]);
 
-  const loadConfig = (ob) => {
+  const loadConfig = (name, ob) => {
     setObs(ob);
+    setConfigName(name);
   };
 
   return (
@@ -46,7 +45,7 @@ export default function Configurations({
                   </div>
                   <button
                     className="bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold py-2 px-4 rounded shadow-lg hover:from-orange-600 hover:to-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
-                    onClick={() => loadConfig(value)}
+                    onClick={() => loadConfig(key, value)}
                   >
                     Load
                   </button>
