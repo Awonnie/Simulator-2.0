@@ -692,7 +692,7 @@ export default function Simulator() {
       )}
 
       {/* Configurations Loader */}
-      <Configurations haveConfig={haveConfig} />
+      <Configurations obs={obstacles} setObs={setObstacles} />
 
       <div className="py-4 flex justify-center gap-4">
         <button
