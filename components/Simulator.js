@@ -168,6 +168,7 @@ export default function Simulator() {
   const saveConfig = () => {
     let obs = obstacles;
     let newConfigs = { ...configurations };
+    let itExists = false;
 
     //If config is empty
     if (!haveConfig.current) {
@@ -181,7 +182,7 @@ export default function Simulator() {
     for (const name in configurations) {
       if (configurations[name].length != obs.length) continue;
       let config = configurations[name];
-      let itExists = true;
+      itExists = true;
 
       //Before comparing their ids, we standardise by sorting them
       config.sort((a, b) => a.id - b.id);
@@ -564,9 +565,7 @@ export default function Simulator() {
   }, [page, path]);
 
   useEffect(() => {
-    console.log("HaveConfig:", haveConfig.current);
     if (haveConfig.current) {
-      console.log("Config:", configurations);
       localStorage.setItem("Configurations", JSON.stringify(configurations));
     }
     if (obstacles.length > 0) {

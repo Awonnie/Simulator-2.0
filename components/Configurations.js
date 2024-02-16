@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 
 export default function Configurations({
   obs,
@@ -7,7 +7,8 @@ export default function Configurations({
   configs,
   setConfigs,
 }) {
-  const configList = JSON.parse(localStorage.getItem("Configurations"));
+  let configList = JSON.parse(localStorage.getItem("Configurations"));
+  const [counter, setCounter] = useState(0);
 
   useEffect(() => {
     if (configList) {
@@ -17,6 +18,13 @@ export default function Configurations({
       haveConfig.current = false;
     }
   }, []);
+
+  useEffect(() => {
+    if (haveConfig.current) {
+      configList = configs;
+      setCounter(counter + 1);
+    }
+  }, [configs]);
 
   const loadConfig = (ob) => {
     setObs(ob);
