@@ -1,5 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import QueryAPI from "./QueryAPI";
+import dynamic from "next/dynamic";
+
+const Configurations = dynamic(() => import("./Configurations"), {
+  ssr: false,
+});
 
 const Direction = {
   NORTH: 0,
@@ -685,6 +690,9 @@ export default function Simulator() {
           </div>
         </div>
       )}
+
+      {/* Configurations Loader */}
+      <Configurations haveConfig={haveConfig} />
 
       <div className="py-4 flex justify-center gap-4">
         <button
