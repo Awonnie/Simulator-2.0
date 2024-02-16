@@ -231,10 +231,17 @@ export default function Simulator() {
   };
 
   const changeOrientation = (obInput) => {
-    let newObstacles = [...obstacles];
-    for (const ob of newObstacles) {
-      if (ob.id == obInput.id) ob.d = (ob.d + 2) % 8;
-    }
+    let newObstacles = obstacles.map((ob) => {
+      if (ob.id === obInput.id) {
+        const newDir = (ob.d + 2) % 8;
+        return {
+          ...ob,
+          d: newDir,
+          id: hashString(`${ob.x}-${ob.y}-${newDir}`),
+        };
+      }
+      return ob;
+    });
     setObstacles(newObstacles);
   };
 
@@ -555,7 +562,10 @@ export default function Simulator() {
     if (haveConfig.current) {
       localStorage.setItem("Configurations", JSON.stringify(configurations));
     }
-  }, [configurations]);
+    if (obstacles.length > 0) {
+      console.log("Obstacles:", obstacles);
+    }
+  }, [obstacles, configurations]);
 
   return (
     <div className="flex flex-col items-center justify-center p-6 bg-gray-50">
