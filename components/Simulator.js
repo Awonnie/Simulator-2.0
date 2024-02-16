@@ -168,6 +168,7 @@ export default function Simulator() {
   const saveConfig = () => {
     let obs = obstacles;
     let newConfigs = { ...configurations };
+    let itExists = false;
 
     //If config is empty
     if (!haveConfig.current) {
@@ -181,7 +182,7 @@ export default function Simulator() {
     for (const name in configurations) {
       if (configurations[name].length != obs.length) continue;
       let config = configurations[name];
-      let itExists = true;
+      itExists = true;
 
       //Before comparing their ids, we standardise by sorting them
       config.sort((a, b) => a.id - b.id);
@@ -195,16 +196,24 @@ export default function Simulator() {
       }
 
       if (itExists) {
-        if (name === configName) return; //If it exists and the name is the same, you dont need to save, can just return
+        if (name === configName) {
+          console.log("Exists and same name, exiting...");
+          return;
+        } //If it exists and the name is the same, you dont need to save, can just return
 
         //If it exists and the name is different, you need to update the name
+        console.log("Exists but different name, deleting...");
         delete newConfigs[name];
+        newConfigs[configName] = obstacles;
+        setConfigurations(newConfigs);
         break;
       }
     }
 
-    newConfigs[configName] = obstacles;
-    setConfigurations(newConfigs);
+    if (!itExists) {
+      newConfigs[configName] = obstacles;
+      setConfigurations(newConfigs);
+    }
   };
 
   const hashString = (str) => {
@@ -692,7 +701,13 @@ export default function Simulator() {
       )}
 
       {/* Configurations Loader */}
-      <Configurations obs={obstacles} setObs={setObstacles} />
+      <Configurations
+        obs={obstacles}
+        setObs={setObstacles}
+        haveConfig={haveConfig}
+        configs={configurations}
+        setConfigs={setConfigurations}
+      />
 
       <div className="py-4 flex justify-center gap-4">
         <button

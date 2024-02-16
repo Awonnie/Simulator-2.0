@@ -1,5 +1,18 @@
-export default function Configurations({ obs, setObs }) {
+import { useEffect } from "react";
+
+export default function Configurations({
+  obs,
+  setObs,
+  haveConfig,
+  configs,
+  setConfigs,
+}) {
   const configList = JSON.parse(localStorage.getItem("Configurations"));
+  haveConfig.current = configList ? true : false;
+
+  useEffect(() => {
+    if (configList) setConfigs(configList);
+  }, []);
 
   const loadConfig = (ob) => {
     setObs(ob);
