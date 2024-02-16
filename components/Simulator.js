@@ -203,6 +203,14 @@ export default function Simulator() {
     setObstacles(newObstacles);
   };
 
+  const changeOrientation = (obInput) => {
+    let newObstacles = [...obstacles];
+    for (const ob of newObstacles) {
+      if (ob.id == obInput.id) ob.d = (ob.d + 2) % 8;
+    }
+    setObstacles(newObstacles);
+  };
+
   const onClickRobot = () => {
     // Set the robot state to the input
 
@@ -339,21 +347,34 @@ export default function Simulator() {
         }
 
         if (foundOb) {
+          console.log("foundOb", foundOb);
           if (foundOb.d === Direction.WEST) {
             cells.push(
-              <td className="border border-l-4 border-l-red-500 w-5 h-5 md:w-8 md:h-8 bg-blue-700" />
+              <td
+                className="border border-l-4 border-l-red-500 w-5 h-5 md:w-8 md:h-8 bg-blue-700 hover:cursor-pointer"
+                onClick={() => changeOrientation(foundOb)}
+              />
             );
           } else if (foundOb.d === Direction.EAST) {
             cells.push(
-              <td className="border border-r-4 border-r-red-500 w-5 h-5 md:w-8 md:h-8 bg-blue-700" />
+              <td
+                className="border border-r-4 border-r-red-500 w-5 h-5 md:w-8 md:h-8 bg-blue-700 hover:cursor-pointer"
+                onClick={() => changeOrientation(foundOb)}
+              />
             );
           } else if (foundOb.d === Direction.NORTH) {
             cells.push(
-              <td className="border border-t-4 border-t-red-500 w-5 h-5 md:w-8 md:h-8 bg-blue-700" />
+              <td
+                className="border border-t-4 border-t-red-500 w-5 h-5 md:w-8 md:h-8 bg-blue-700 hover:cursor-pointer"
+                onClick={() => changeOrientation(foundOb)}
+              />
             );
           } else if (foundOb.d === Direction.SOUTH) {
             cells.push(
-              <td className="border border-b-4 border-b-red-500 w-5 h-5 md:w-8 md:h-8 bg-blue-700" />
+              <td
+                className="border border-b-4 border-b-red-500 w-5 h-5 md:w-8 md:h-8 bg-blue-700 hover:cursor-pointer"
+                onClick={() => changeOrientation(foundOb)}
+              />
             );
           } else if (foundOb.d === Direction.SKIP) {
             cells.push(
