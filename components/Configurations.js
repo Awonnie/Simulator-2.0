@@ -8,10 +8,14 @@ export default function Configurations({
   setConfigs,
 }) {
   const configList = JSON.parse(localStorage.getItem("Configurations"));
-  haveConfig.current = configList ? true : false;
 
   useEffect(() => {
-    if (configList) setConfigs(configList);
+    if (configList) {
+      setConfigs(configList);
+      haveConfig.current = true;
+    } else {
+      haveConfig.current = false;
+    }
   }, []);
 
   const loadConfig = (ob) => {

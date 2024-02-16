@@ -92,7 +92,7 @@ export default function Simulator() {
   const [path_duration, setPathDuration] = useState([]);
   const [duration, setDuration] = useState(0);
   const [configName, setConfigName] = useState("");
-  const [configurations, setConfigurations] = useState({});
+  const [configurations, setConfigurations] = useState(null);
   const isAnimating = useRef(false);
   const haveConfig = useRef(false);
 
@@ -168,7 +168,6 @@ export default function Simulator() {
   const saveConfig = () => {
     let obs = obstacles;
     let newConfigs = { ...configurations };
-    let itExists = false;
 
     //If config is empty
     if (!haveConfig.current) {
@@ -182,7 +181,7 @@ export default function Simulator() {
     for (const name in configurations) {
       if (configurations[name].length != obs.length) continue;
       let config = configurations[name];
-      itExists = true;
+      let itExists = true;
 
       //Before comparing their ids, we standardise by sorting them
       config.sort((a, b) => a.id - b.id);
@@ -196,24 +195,16 @@ export default function Simulator() {
       }
 
       if (itExists) {
-        if (name === configName) {
-          console.log("Exists and same name, exiting...");
-          return;
-        } //If it exists and the name is the same, you dont need to save, can just return
+        if (name === configName) return; //If it exists and the name is the same, you dont need to save, can just return
 
         //If it exists and the name is different, you need to update the name
-        console.log("Exists but different name, deleting...");
         delete newConfigs[name];
-        newConfigs[configName] = obstacles;
-        setConfigurations(newConfigs);
         break;
       }
     }
 
-    if (!itExists) {
-      newConfigs[configName] = obstacles;
-      setConfigurations(newConfigs);
-    }
+    newConfigs[configName] = obstacles;
+    setConfigurations(newConfigs);
   };
 
   const hashString = (str) => {
@@ -573,7 +564,9 @@ export default function Simulator() {
   }, [page, path]);
 
   useEffect(() => {
+    console.log("HaveConfig:", haveConfig.current);
     if (haveConfig.current) {
+      console.log("Config:", configurations);
       localStorage.setItem("Configurations", JSON.stringify(configurations));
     }
     if (obstacles.length > 0) {
