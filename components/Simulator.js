@@ -533,6 +533,7 @@ export default function Simulator() {
         </h2>
       </div>
 
+      {/* Robot Position */}
       <div className="bg-white rounded-xl shadow-xl mb-8 p-4 w-full max-w-4xl">
         <div className="card-body items-center text-center p-4">
           <h2 className="text-xl font-semibold text-purple-700">
@@ -580,40 +581,49 @@ export default function Simulator() {
         </div>
       </div>
 
-      <div className="grid grid-cols-4 gap-4 p-4">
-        {obstacles.map((ob) => {
-          return (
-            <div
-              key={ob}
-              className="flex justify-between items-center bg-white rounded-lg shadow-md p-3 border border-purple-300"
-            >
-              <div flex flex-col className="text-purple-800">
-                <div className="font-semibold">X: {ob.x}</div>
-                <div className="font-semibold">Y: {ob.y}</div>
-                <div className="font-semibold">
-                  D: {DirectionToString[ob.d]}
-                </div>
-              </div>
-              <div>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  className="inline-block w-4 h-4 stroke-current"
-                  onClick={() => onRemoveObstacle(ob)}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M6 18L18 6M6 6l12 12"
-                  ></path>
-                </svg>
-              </div>
+      {obstacles.length > 0 && (
+        <div className="bg-white rounded-xl shadow-xl mb-8 p-4 w-full max-w-4xl">
+          <div className="card-body items-center text-center p-4">
+            <h2 className="text-xl font-semibold text-purple-700">
+              Current Obstacles
+            </h2>
+            <div className="grid grid-cols-5 gap-5 p-5">
+              {obstacles.map((ob) => {
+                return (
+                  <div
+                    key={ob}
+                    className="flex justify-between items-center bg-white rounded-lg shadow-md p-3 border border-purple-300"
+                  >
+                    <div flex flex-col className="text-purple-800">
+                      <div className="font-semibold">X: {ob.x}</div>
+                      <div className="font-semibold">Y: {ob.y}</div>
+                      <div className="font-semibold">
+                        D: {DirectionToString[ob.d]}
+                      </div>
+                    </div>
+                    <div>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        className="inline-block w-4 h-4 stroke-black hover:cursor-pointer"
+                        onClick={() => onRemoveObstacle(ob)}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M6 18L18 6M6 6l12 12"
+                        ></path>
+                      </svg>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
-          );
-        })}
-      </div>
+          </div>
+        </div>
+      )}
 
       <div className="py-4 flex justify-center gap-4">
         <button
