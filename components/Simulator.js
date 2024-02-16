@@ -56,8 +56,8 @@ function interpolatePath(path) {
       interpolatedPath.push({
         d: start.d, // Assume direction doesn't change, adjust as necessary
         s: start.s,
-        x: start.x + stepX * step, 
-        y: start.y + stepY * step, 
+        x: start.x + stepX * step,
+        y: start.y + stepY * step,
       });
     }
   }
@@ -79,9 +79,6 @@ export default function Simulator() {
   const [robotY, setRobotY] = useState(1);
   const [robotDir, setRobotDir] = useState(0);
   const [obstacles, setObstacles] = useState([]);
-  const [obXInput, setObXInput] = useState(0);
-  const [obYInput, setObYInput] = useState(0);
-  const [directionInput, setDirectionInput] = useState(ObDirection.NORTH);
   const [isComputing, setIsComputing] = useState(false);
   const [path, setPath] = useState([]);
   const [commands, setCommands] = useState([]);
@@ -150,32 +147,6 @@ export default function Simulator() {
     return robotCells;
   };
 
-  const onChangeX = (event) => {
-    // If the input is an integer and is in the range [0, 19], set ObXInput to the input
-    if (Number.isInteger(Number(event.target.value))) {
-      const nb = Number(event.target.value);
-      if (0 <= nb && nb < 20) {
-        setObXInput(nb);
-        return;
-      }
-    }
-    // If the input is not an integer or is not in the range [0, 19], set the input to 0
-    setObXInput(0);
-  };
-
-  const onChangeY = (event) => {
-    // If the input is an integer and is in the range [0, 19], set ObYInput to the input
-    if (Number.isInteger(Number(event.target.value))) {
-      const nb = Number(event.target.value);
-      if (0 <= nb && nb <= 19) {
-        setObYInput(nb);
-        return;
-      }
-    }
-    // If the input is not an integer or is not in the range [0, 19], set the input to 0
-    setObYInput(0);
-  };
-
   const onChangeRobotX = (event) => {
     // If the input is an integer and is in the range [1, 18], set RobotX to the input
     if (Number.isInteger(Number(event.target.value))) {
@@ -202,19 +173,33 @@ export default function Simulator() {
     setRobotY(1);
   };
 
-  const onClickObstacle = () => {
-    // If the input is not valid, return
-    if (!obXInput && !obYInput) return;
-    // Create a new array of obstacles
+  const hashString = (str) => {
+    let hash = 0;
+    if (str.length === 0) {
+      return hash;
+    }
+    for (let i = 0; i < str.length; i++) {
+      const char = str.charCodeAt(i);
+      hash = (hash << 5) - hash + char;
+      hash = hash & hash; // Convert to 32-bit integer
+    }
+    return hash;
+  };
+
+  const onClickObstacle = (obInput) => {
+    const { x, y, d } = obInput;
+    const id = hashString(`${x}-${y}-${d}`);
+    //Check if obstacle already exists using id
+    for (const ob in obstacles) {
+      if (ob.id === id) return;
+    }
+
+    //Update to obstacle list
+    const currentObstacle = { ...obInput, id: id };
+    console.log("current Obstacle", currentObstacle);
     const newObstacles = [...obstacles];
-    // Add the new obstacle to the array
-    newObstacles.push({
-      x: obXInput,
-      y: obYInput,
-      d: directionInput,
-      id: generateNewID(),
-    });
-    // Set the obstacles to the new array
+    console.log("New Obstacle", newObstacles);
+    newObstacles.push(currentObstacle);
     setObstacles(newObstacles);
   };
 
@@ -222,11 +207,6 @@ export default function Simulator() {
     // Set the robot state to the input
 
     setRobotState({ x: robotX, y: robotY, d: robotDir, s: -1 });
-  };
-
-  const onDirectionInputChange = (event) => {
-    // Set the direction input to the input
-    setDirectionInput(Number(event.target.value));
   };
 
   const onRobotDirectionInputChange = (event) => {
@@ -256,9 +236,9 @@ export default function Simulator() {
       if (data) {
         // If the data is valid, set the path
         setPath(data.data.path);
-        
-        console.log("Path:",path);
-        console.log("New path:",newpath);
+
+        console.log("Path:", path);
+        console.log("New path:", newpath);
 
         // Path duration contains a list of the duration of each step
         setPathDuration(data.data.path_time);
@@ -267,8 +247,8 @@ export default function Simulator() {
         setDuration(data.data.duration);
         setDistance(data.data.distance); // Update this line to set the distance
 
-        console.log("Distance:",distance);
-        console.log("Duration:",duration);
+        console.log("Distance:", distance);
+        console.log("Duration:", duration);
         // Set the commands
         const commands = [];
         for (let x of data.data.commands) {
@@ -284,7 +264,6 @@ export default function Simulator() {
       setIsComputing(false);
     });
   };
-
 
   const onResetAll = () => {
     // Reset all the states
@@ -396,8 +375,16 @@ export default function Simulator() {
             );
           }
         } else {
+          const ob = {
+            x: j,
+            y: 19 - i,
+            d: ObDirection.NORTH,
+          };
           cells.push(
-            <td className="border-black border w-5 h-5 md:w-8 md:h-8" />
+            <td
+              className="border-black border w-5 h-5 md:w-8 md:h-8 hover:border-t-4 hover:border-t-red-500 hover:bg-blue-700 cursor-pointer"
+              onClick={() => onClickObstacle(ob)}
+            />
           );
         }
       }
@@ -473,17 +460,16 @@ export default function Simulator() {
   // Function to pad a number with leading zeros if it's less than 10
   const padZero = (num) => (num < 10 ? `0${num}` : num);
 
-
   async function sleep(seconds) {
     return new Promise((resolve) => setTimeout(resolve, seconds * 1000));
   }
 
   const startImmediate = async () => {
-      for (let i = 0; i < newpath.length; i++) {
-        await sleep(0.02);
-        setRobotState(newpath[i]);
-      }
+    for (let i = 0; i < newpath.length; i++) {
+      await sleep(0.02);
+      setRobotState(newpath[i]);
     }
+  };
 
   // Function to start the animation
   const startAnimation = async () => {
@@ -491,12 +477,12 @@ export default function Simulator() {
     startTimer();
     console.log(path_duration);
     for (let i = 0; i < path_duration.length; i++) {
-      if (!isAnimating.current){
+      if (!isAnimating.current) {
         setPage(0);
         break;
       }
       await sleep(path_duration[i]);
-      setPage(i)
+      setPage(i);
       if (i + 1 == +path_duration.length) stopTimer();
     }
   };
@@ -517,7 +503,6 @@ export default function Simulator() {
     setRobotState(path[page]);
     setnewPath(interpolatePath(path));
   }, [page, path]);
-
 
   return (
     <div className="flex flex-col items-center justify-center p-6 bg-gray-50">
@@ -556,63 +541,18 @@ export default function Simulator() {
               <select
                 onChange={onRobotDirectionInputChange}
                 value={robotDir}
-                className="select select-bordered text-purple-900">
-                <option value={ObDirection.NORTH}>Up</option>
-                <option value={ObDirection.SOUTH}>Down</option>
-                <option value={ObDirection.WEST}>Left</option>
-                <option value={ObDirection.EAST}>Right</option>
-              </select>
-              <button
-                className="btn bg-purple-600 hover:bg-purple-700 text-white p-2 rounded-r"
-                onClick={onClickRobot}>
-                Set
-              </button>
-            </label>
-          </div>
-        </div>
-      </div>
-
-      <div className="bg-white rounded-xl shadow-xl mb-8 p-4 w-full max-w-4xl">
-        <div className="card-body items-center text-center p-4">
-          <h2 className="text-xl font-semibold text-purple-700">
-            Add Obstacles
-          </h2>
-          <div className="form-control mt-4">
-            <label className="input-group">
-              <span className="bg-purple-500 text-white p-2 rounded-l">X</span>
-              <input
-                onChange={onChangeX}
-                type="number"
-                placeholder="1"
-                min="0"
-                max="19"
-                className="input input-bordered text-purple-900"
-              />
-              <span className="bg-purple-500 text-white p-2">Y</span>
-              <input
-                onChange={onChangeY}
-                type="number"
-                placeholder="1"
-                min="0"
-                max="19"
-                className="input input-bordered text-purple-900"
-              />
-              <span className="bg-purple-500 text-white p-2">D</span>
-              <select
-                onChange={onDirectionInputChange}
-                value={directionInput}
                 className="select select-bordered text-purple-900"
               >
                 <option value={ObDirection.NORTH}>Up</option>
                 <option value={ObDirection.SOUTH}>Down</option>
                 <option value={ObDirection.WEST}>Left</option>
                 <option value={ObDirection.EAST}>Right</option>
-                <option value={ObDirection.SKIP}>None</option>
               </select>
               <button
                 className="btn bg-purple-600 hover:bg-purple-700 text-white p-2 rounded-r"
-                onClick={onClickObstacle}>
-                Add
+                onClick={onClickRobot}
+              >
+                Set
               </button>
             </label>
           </div>
@@ -624,11 +564,14 @@ export default function Simulator() {
           return (
             <div
               key={ob}
-              className="flex justify-between items-center bg-white rounded-lg shadow-md p-3 border border-purple-300">
+              className="flex justify-between items-center bg-white rounded-lg shadow-md p-3 border border-purple-300"
+            >
               <div flex flex-col className="text-purple-800">
                 <div className="font-semibold">X: {ob.x}</div>
                 <div className="font-semibold">Y: {ob.y}</div>
-                <div className="font-semibold">D: {DirectionToString[ob.d]}</div>
+                <div className="font-semibold">
+                  D: {DirectionToString[ob.d]}
+                </div>
               </div>
               <div>
                 <svg
@@ -636,7 +579,8 @@ export default function Simulator() {
                   fill="none"
                   viewBox="0 0 24 24"
                   className="inline-block w-4 h-4 stroke-current"
-                  onClick={() => onRemoveObstacle(ob)}>
+                  onClick={() => onRemoveObstacle(ob)}
+                >
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -653,22 +597,24 @@ export default function Simulator() {
       <div className="py-4 flex justify-center gap-4">
         <button
           className="bg-gradient-to-r from-purple-600 to-purple-700 text-white font-bold py-2 px-4 rounded shadow-lg hover:from-purple-700 hover:to-purple-800 focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-opacity-50 transition duration-150 ease-in-out"
-          onClick={onResetAll}>
+          onClick={onResetAll}
+        >
           Reset All
         </button>
 
         <button
           className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white font-bold py-2 px-4 rounded shadow-lg hover:from-yellow-600 hover:to-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
-          onClick={onReset}>
+          onClick={onReset}
+        >
           Reset Robot
         </button>
 
         <button
           className="bg-gradient-to-r from-green-500 to-green-600 text-white font-bold py-2 px-4 rounded shadow-lg hover:from-green-600 hover:to-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
-          onClick={compute}>
+          onClick={compute}
+        >
           Submit
         </button>
-
       </div>
 
       {/* Timer display */}
@@ -680,23 +626,25 @@ export default function Simulator() {
 
       {/* Animation controls */}
       <div className="flex justify-center gap-4 py-4">
-
         <button
           className="bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold py-2 px-4 rounded shadow-lg hover:from-blue-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
-          onClick={startImmediate}>
+          onClick={startImmediate}
+        >
           Immediate
         </button>
 
         <button
           className="bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold py-2 px-4 rounded shadow-lg hover:from-blue-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
-          onClick={startAnimation}>
+          onClick={startAnimation}
+        >
           Start Animation
         </button>
 
         <button
           className="bg-gradient-to-r from-red-500 to-red-600 text-white font-bold py-2 px-4 rounded shadow-lg hover:from-red-600 hover:to-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
-          onClick={clearAnimation}>
-          Clear 
+          onClick={clearAnimation}
+        >
+          Clear
         </button>
       </div>
 
@@ -735,7 +683,6 @@ export default function Simulator() {
             <h2 className="text-xl font-semibold">Timing: {duration}s</h2>
           </div>
         </div>
-
       </div>
     </div>
   );
