@@ -1,5 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import QueryAPI from "./QueryAPI";
+import dynamic from "next/dynamic";
+
+const Configurations = dynamic(() => import("./Configurations"), {
+  ssr: false,
+});
 
 const Direction = {
   NORTH: 0,
@@ -86,23 +91,10 @@ export default function Simulator() {
   const [page, setPage] = useState(0);
   const [path_duration, setPathDuration] = useState([]);
   const [duration, setDuration] = useState(0);
+  const [configName, setConfigName] = useState("");
+  const [configurations, setConfigurations] = useState(null);
   const isAnimating = useRef(false);
-
-  const generateNewID = () => {
-    while (true) {
-      let new_id = Math.floor(Math.random() * 10) + 1; // just try to generate an id;
-      let ok = true;
-      for (const ob of obstacles) {
-        if (ob.id === new_id) {
-          ok = false;
-          break;
-        }
-      }
-      if (ok) {
-        return new_id;
-      }
-    }
-  };
+  const haveConfig = useRef(false);
 
   const generateRobotCells = () => {
     const robotCells = [];
@@ -173,6 +165,54 @@ export default function Simulator() {
     setRobotY(1);
   };
 
+  const saveConfig = () => {
+    let obs = obstacles;
+    let newConfigs = { ...configurations };
+    let itExists = false;
+
+    //If config is empty
+    if (!haveConfig.current) {
+      console.log("For some reason, have config is still false");
+      newConfigs[configName] = obstacles;
+      haveConfig.current = true;
+      setConfigurations(newConfigs);
+      return;
+    }
+
+    //Check with the current configuration via id and see if it exists
+    for (const name in configurations) {
+      if (configurations[name].length != obs.length) continue;
+      let config = configurations[name];
+      itExists = true;
+
+      //Before comparing their ids, we standardise by sorting them
+      config.sort((a, b) => a.id - b.id);
+      obs.sort((a, b) => a.id - b.id);
+      for (let i = 0; i < config.length; i++) {
+        //If any of the ids dont match, we can skip to the next configuration
+        if (config[i].id != obs[i].id) {
+          itExists = false;
+          break;
+        }
+      }
+
+      if (itExists) {
+        if (name === configName) {
+          console.log("Name exists...");
+          return;
+        } //If it exists and the name is the same, you dont need to save, can just return
+
+        //If it exists and the name is different, you need to update the name
+        console.log("Updating name...");
+        delete newConfigs[name];
+        break;
+      }
+    }
+
+    newConfigs[configName] = obstacles;
+    setConfigurations(newConfigs);
+  };
+
   const hashString = (str) => {
     let hash = 0;
     if (str.length === 0) {
@@ -196,18 +236,23 @@ export default function Simulator() {
 
     //Update to obstacle list
     const currentObstacle = { ...obInput, id: id };
-    console.log("current Obstacle", currentObstacle);
     const newObstacles = [...obstacles];
-    console.log("New Obstacle", newObstacles);
     newObstacles.push(currentObstacle);
     setObstacles(newObstacles);
   };
 
   const changeOrientation = (obInput) => {
-    let newObstacles = [...obstacles];
-    for (const ob of newObstacles) {
-      if (ob.id == obInput.id) ob.d = (ob.d + 2) % 8;
-    }
+    let newObstacles = obstacles.map((ob) => {
+      if (ob.id === obInput.id) {
+        const newDir = (ob.d + 2) % 8;
+        return {
+          ...ob,
+          d: newDir,
+          id: hashString(`${ob.x}-${ob.y}-${newDir}`),
+        };
+      }
+      return ob;
+    });
     setObstacles(newObstacles);
   };
 
@@ -347,7 +392,6 @@ export default function Simulator() {
         }
 
         if (foundOb) {
-          console.log("foundOb", foundOb);
           if (foundOb.d === Direction.WEST) {
             cells.push(
               <td
@@ -525,6 +569,15 @@ export default function Simulator() {
     setnewPath(interpolatePath(path));
   }, [page, path]);
 
+  useEffect(() => {
+    if (haveConfig.current) {
+      localStorage.setItem("Configurations", JSON.stringify(configurations));
+    }
+    if (obstacles.length > 0) {
+      console.log("Obstacles:", obstacles);
+    }
+  }, [obstacles, configurations]);
+
   return (
     <div className="flex flex-col items-center justify-center p-6 bg-gray-50">
       <div className="text-center mb-8">
@@ -581,6 +634,7 @@ export default function Simulator() {
         </div>
       </div>
 
+      {/* Obstacle List View */}
       {obstacles.length > 0 && (
         <div className="bg-white rounded-xl shadow-xl mb-8 p-4 w-full max-w-4xl">
           <div className="card-body items-center text-center p-4">
@@ -621,9 +675,37 @@ export default function Simulator() {
                 );
               })}
             </div>
+            <div className="container flex justify-center">
+              <div className="flex justify-center rounded-md bg-gradient-to-r from-orange-300 to-orange-700 mr-4 w-1/2">
+                <p className="font-bold">Config Name:</p>
+                <input
+                  type="text"
+                  className="w-full rounded-md m-1 text-center text-gray-900 hover:shadow-inner focus:outline-none"
+                  value={configName}
+                  placeholder={configName}
+                  onChange={(e) => setConfigName(e.target.value)}
+                />
+              </div>
+
+              <button
+                className="bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold py-2 px-4 rounded shadow-lg hover:from-orange-600 hover:to-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
+                onClick={saveConfig}
+              >
+                Save Configuration
+              </button>
+            </div>
           </div>
         </div>
       )}
+
+      {/* Configurations Loader */}
+      <Configurations
+        setConfigName={setConfigName}
+        setObs={setObstacles}
+        haveConfig={haveConfig}
+        configs={configurations}
+        setConfigs={setConfigurations}
+      />
 
       <div className="py-4 flex justify-center gap-4">
         <button
