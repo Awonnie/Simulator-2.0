@@ -90,6 +90,9 @@ export default function Simulator() {
   const [path_duration, setPathDuration] = useState([]);
   const [duration, setDuration] = useState(0);
   const isAnimating = useRef(false);
+  const [leaveTrace, setLeaveTrace] = useState(false); // Default to not leaving a trace
+  const [pathHistory, setPathHistory] = useState([]);
+
 
   const generateNewID = () => {
     while (true) {
@@ -341,11 +344,20 @@ export default function Simulator() {
       for (let j = 0; j < 20; j++) {
         let foundOb = null;
         let foundRobotCell = null;
+        let foundTraceCell = null;
 
         for (const ob of obstacles) {
           const transformed = transformCoord(ob.x, ob.y);
           if (transformed.x === i && transformed.y === j) {
             foundOb = ob;
+            break;
+          }
+        }
+
+        for (const trace of pathHistory) {
+          const transformed = transformCoord(trace.x, trace.y);
+          if (transformed.x === i && transformed.y === j) {
+            foundTraceCell = trace;
             break;
           }
         }
@@ -395,6 +407,12 @@ export default function Simulator() {
               <td className="bg-green-600 border-white border w-5 h-5 md:w-8 md:h-8" />
             );
           }
+        } else if (foundTraceCell && leaveTrace) {
+          cells.push(
+            <td
+              className="border w-5 h-5 md:w-8 md:h-8 bg-blue-500" // Example style for path history cells
+            />
+          );
         } else {
           cells.push(
             <td className="border-black border w-5 h-5 md:w-8 md:h-8" />
@@ -482,6 +500,7 @@ export default function Simulator() {
       for (let i = 0; i < newpath.length; i++) {
         await sleep(0.02);
         setRobotState(newpath[i]);
+        updatePathHistory(path[i]);
       }
     }
 
@@ -496,7 +515,8 @@ export default function Simulator() {
         break;
       }
       await sleep(path_duration[i]);
-      setPage(i)
+      setPage(i);
+      updatePathHistory(path[i]);
       if (i + 1 == +path_duration.length) stopTimer();
     }
   };
@@ -511,6 +531,19 @@ export default function Simulator() {
     setRobotState({ x: 1, y: 1, d: Direction.NORTH, s: -1 });
     setPage(0);
   };
+
+  /// Example addition to the robot movement logic
+  const updatePathHistory = (pathObj) => {
+      setPathHistory(prev => [...prev, { ...pathObj }]);
+  };
+
+  // Function to clear the trace
+  const clearTrace = () => {
+    setLeaveTrace(0);
+    setPathHistory([]);
+  };
+
+
 
   useEffect(() => {
     if (page >= path.length) return;
@@ -698,6 +731,19 @@ export default function Simulator() {
           onClick={clearAnimation}>
           Clear 
         </button>
+
+        <button
+          className={`btn ${leaveTrace ? "bg-green-500 hover:bg-green-600" : "bg-red-500 hover:bg-red-600"} text-white font-bold py-2 px-4 rounded shadow-lg focus:outline-none focus:ring-2 transition duration-150 ease-in-out`}
+          onClick={() => setLeaveTrace(!leaveTrace)}>
+          {leaveTrace ? "Leave Trace: ON" : "Leave Trace: OFF"}
+        </button>
+
+        <button
+          className="bg-gradient-to-r from-red-500 to-red-600 text-white font-bold py-2 px-4 rounded shadow-lg hover:from-red-600 hover:to-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
+          onClick={clearTrace}>
+          Clear Trace
+        </button>
+
       </div>
 
       <div className="flex flex-row w-full max-w-6xl">
