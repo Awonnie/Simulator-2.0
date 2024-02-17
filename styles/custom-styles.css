@@ -20,4 +20,9 @@
   .highlighted {
     background-color: rgb(0, 162, 255);
   }
+
+  .path-cell {
+    background-color: rgb(0, 162, 255); /* Or any indication of a trace */
+  }
+  
   
