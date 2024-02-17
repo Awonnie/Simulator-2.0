@@ -1,6 +1,6 @@
+import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
 import QueryAPI from "./QueryAPI";
-import dynamic from "next/dynamic";
 
 const Configurations = dynamic(() => import("./Configurations"), {
   ssr: false,
@@ -94,6 +94,25 @@ export default function Simulator() {
   const [configName, setConfigName] = useState("");
   const [configurations, setConfigurations] = useState(null);
   const isAnimating = useRef(false);
+  const [leaveTrace, setLeaveTrace] = useState(false); // Default to not leaving a trace
+  const [pathHistory, setPathHistory] = useState([]);
+
+
+  const generateNewID = () => {
+    while (true) {
+      let new_id = Math.floor(Math.random() * 10) + 1; // just try to generate an id;
+      let ok = true;
+      for (const ob of obstacles) {
+        if (ob.id === new_id) {
+          ok = false;
+          break;
+        }
+      }
+      if (ok) {
+        return new_id;
+      }
+    }
+  };
   const haveConfig = useRef(false);
 
   const generateRobotCells = () => {
@@ -373,11 +392,20 @@ export default function Simulator() {
       for (let j = 0; j < 20; j++) {
         let foundOb = null;
         let foundRobotCell = null;
+        let foundTraceCell = null;
 
         for (const ob of obstacles) {
           const transformed = transformCoord(ob.x, ob.y);
           if (transformed.x === i && transformed.y === j) {
             foundOb = ob;
+            break;
+          }
+        }
+
+        for (const trace of pathHistory) {
+          const transformed = transformCoord(trace.x, trace.y);
+          if (transformed.x === i && transformed.y === j) {
+            foundTraceCell = trace;
             break;
           }
         }
@@ -439,6 +467,12 @@ export default function Simulator() {
               <td className="bg-green-600 border-white border w-5 h-5 md:w-8 md:h-8" />
             );
           }
+        } else if (foundTraceCell && leaveTrace) {
+          cells.push(
+            <td
+              className="border w-5 h-5 md:w-8 md:h-8 bg-blue-500" // Example style for path history cells
+            />
+          );
         } else {
           const ob = {
             x: j,
@@ -530,11 +564,12 @@ export default function Simulator() {
   }
 
   const startImmediate = async () => {
-    for (let i = 0; i < newpath.length; i++) {
-      await sleep(0.02);
-      setRobotState(newpath[i]);
-    }
-  };
+      for (let i = 0; i < newpath.length; i++) {
+        await sleep(0.02);
+        setRobotState(newpath[i]);
+        updatePathHistory(path[i]);
+      }
+    };
 
   // Function to start the animation
   const startAnimation = async () => {
@@ -548,6 +583,7 @@ export default function Simulator() {
       }
       await sleep(path_duration[i]);
       setPage(i);
+      updatePathHistory(path[i]);
       if (i + 1 == +path_duration.length) stopTimer();
     }
   };
@@ -562,6 +598,19 @@ export default function Simulator() {
     setRobotState({ x: 1, y: 1, d: Direction.NORTH, s: -1 });
     setPage(0);
   };
+
+  /// Example addition to the robot movement logic
+  const updatePathHistory = (pathObj) => {
+      setPathHistory(prev => [...prev, { ...pathObj }]);
+  };
+
+  // Function to clear the trace
+  const clearTrace = () => {
+    setLeaveTrace(0);
+    setPathHistory([]);
+  };
+
+
 
   useEffect(() => {
     if (page >= path.length) return;
@@ -759,6 +808,19 @@ export default function Simulator() {
         >
           Clear
         </button>
+
+        <button
+          className={`btn ${leaveTrace ? "bg-green-500 hover:bg-green-600" : "bg-red-500 hover:bg-red-600"} text-white font-bold py-2 px-4 rounded shadow-lg focus:outline-none focus:ring-2 transition duration-150 ease-in-out`}
+          onClick={() => setLeaveTrace(!leaveTrace)}>
+          {leaveTrace ? "Leave Trace: ON" : "Leave Trace: OFF"}
+        </button>
+
+        <button
+          className="bg-gradient-to-r from-red-500 to-red-600 text-white font-bold py-2 px-4 rounded shadow-lg hover:from-red-600 hover:to-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
+          onClick={clearTrace}>
+          Clear Trace
+        </button>
+
       </div>
 
       <div className="flex flex-row w-full max-w-6xl">
