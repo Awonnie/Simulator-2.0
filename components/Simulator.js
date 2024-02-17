@@ -96,6 +96,8 @@ export default function Simulator() {
   const isAnimating = useRef(false);
   const [leaveTrace, setLeaveTrace] = useState(false); // Default to not leaving a trace
   const [pathHistory, setPathHistory] = useState([]);
+  const [traceEnabled, setTraceEnabled] = useState(true);
+
 
 
   const generateNewID = () => {
@@ -567,7 +569,10 @@ export default function Simulator() {
       for (let i = 0; i < newpath.length; i++) {
         await sleep(0.02);
         setRobotState(newpath[i]);
-        updatePathHistory(path[i]);
+        if (traceEnabled) {
+          updatePathHistory(path[i]);
+          setTraceEnabled(false);
+        }
       }
     };
 
@@ -583,8 +588,13 @@ export default function Simulator() {
       }
       await sleep(path_duration[i]);
       setPage(i);
-      updatePathHistory(path[i]);
-      if (i + 1 == +path_duration.length) stopTimer();
+      if (traceEnabled) {
+        updatePathHistory(path[i]);
+        setTraceEnabled(false);
+      }
+      if (i + 1 == +path.length) {
+        stopTimer();
+      }
     }
   };
 
@@ -608,8 +618,8 @@ export default function Simulator() {
   const clearTrace = () => {
     setLeaveTrace(0);
     setPathHistory([]);
+    setTraceEnabled(true); // Re-enable tracing for new paths
   };
-
 
 
   useEffect(() => {
