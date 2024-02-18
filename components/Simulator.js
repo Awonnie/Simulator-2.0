@@ -98,8 +98,6 @@ export default function Simulator() {
   const [pathHistory, setPathHistory] = useState([]);
   const [traceEnabled, setTraceEnabled] = useState(true);
 
-
-
   const generateNewID = () => {
     while (true) {
       let new_id = Math.floor(Math.random() * 10) + 1; // just try to generate an id;
@@ -291,13 +289,8 @@ export default function Simulator() {
   const onRemoveObstacle = (ob) => {
     // If the path is not empty or the algorithm is computing, return
     if (path.length > 0 || isComputing) return;
-    // Create a new array of obstacles
-    const newObstacles = [];
-    // Add all the obstacles except the one to remove to the new array
-    for (const o of obstacles) {
-      if (o.x === ob.x && o.y === ob.y) continue;
-      newObstacles.push(o);
-    }
+    // Filter out the target obstacle
+    const newObstacles = obstacles.filter((o) => o.id !== ob.id);
     // Set the obstacles to the new array
     setObstacles(newObstacles);
   };
@@ -425,54 +418,54 @@ export default function Simulator() {
           if (foundOb.d === Direction.WEST) {
             cells.push(
               <td
-                className="border border-l-4 border-l-red-500 w-5 h-5 md:w-8 md:h-8 bg-blue-700 hover:cursor-pointer"
+                className="border border-l-4 border-l-red-500 w-5 h-5 md:w-8 md:h-8 bg-blue-700 transition duration-150 ease-in-out hover:cursor-pointer hover:scale-125 active:rotate-90 hover:border-l-red-500 hover:border-l-4"
                 onClick={() => changeOrientation(foundOb)}
               />
             );
           } else if (foundOb.d === Direction.EAST) {
             cells.push(
               <td
-                className="border border-r-4 border-r-red-500 w-5 h-5 md:w-8 md:h-8 bg-blue-700 hover:cursor-pointer"
+                className="border border-r-4 border-r-red-500 w-5 h-5 md:w-8 md:h-8 bg-blue-700 transition duration-150 ease-in-out hover:cursor-pointer hover:scale-125 active:rotate-90 hover:border-r-red-500 hover:border-r-4"
                 onClick={() => changeOrientation(foundOb)}
               />
             );
           } else if (foundOb.d === Direction.NORTH) {
             cells.push(
               <td
-                className="border border-t-4 border-t-red-500 w-5 h-5 md:w-8 md:h-8 bg-blue-700 hover:cursor-pointer"
+                className="border border-t-4 border-t-red-500 w-5 h-5 md:w-8 md:h-8 bg-blue-700 transition duration-150 ease-in-out hover:cursor-pointer hover:scale-125 active:rotate-90 hover:border-t-red-500 hover:border-t-4"
                 onClick={() => changeOrientation(foundOb)}
               />
             );
           } else if (foundOb.d === Direction.SOUTH) {
             cells.push(
               <td
-                className="border border-b-4 border-b-red-500 w-5 h-5 md:w-8 md:h-8 bg-blue-700 hover:cursor-pointer"
+                className="border border-b-4 border-b-red-500 w-5 h-5 md:w-8 md:h-8 bg-blue-700 transition duration-150 ease-in-out hover:cursor-pointer hover:scale-125 active:rotate-90 hover:border-b-red-500 hover:border-b-4"
                 onClick={() => changeOrientation(foundOb)}
               />
             );
           } else if (foundOb.d === Direction.SKIP) {
             cells.push(
-              <td className="border w-5 h-5 md:w-8 md:h-8 bg-blue-700" />
+              <td className="border w-5 h-5 md:w-8 md:h-8 bg-blue-700 transition" />
             );
           }
         } else if (foundRobotCell) {
           if (foundRobotCell.d !== null) {
             cells.push(
               <td
-                className={`border w-5 h-5 md:w-8 md:h-8 ${
+                className={`border w-5 h-5 md:w-8 md:h-8 transition ${
                   foundRobotCell.s != -1 ? "bg-red-500" : "bg-yellow-300"
                 }`}
               />
             );
           } else {
             cells.push(
-              <td className="bg-green-600 border-white border w-5 h-5 md:w-8 md:h-8" />
+              <td className="bg-green-600 border-white border w-5 h-5 md:w-8 md:h-8 transition" />
             );
           }
         } else if (foundTraceCell && leaveTrace) {
           cells.push(
             <td
-              className="border w-5 h-5 md:w-8 md:h-8 bg-blue-500" // Example style for path history cells
+              className="border w-5 h-5 md:w-8 md:h-8 bg-blue-500 transition" // Example style for path history cells
             />
           );
         } else {
@@ -483,7 +476,7 @@ export default function Simulator() {
           };
           cells.push(
             <td
-              className="border-black border w-5 h-5 md:w-8 md:h-8 hover:border-t-4 hover:border-t-red-500 hover:bg-blue-700 cursor-pointer"
+              className="border-black border w-5 h-5 md:w-8 md:h-8 hover:bg-blue-700 cursor-pointer transition"
               onClick={() => onClickObstacle(ob)}
             />
           );
@@ -566,15 +559,15 @@ export default function Simulator() {
   }
 
   const startImmediate = async () => {
-      for (let i = 0; i < newpath.length; i++) {
-        await sleep(0.02);
-        setRobotState(newpath[i]);
-        if (traceEnabled) {
-          updatePathHistory(path[i]);
-          setTraceEnabled(false);
-        }
+    for (let i = 0; i < newpath.length; i++) {
+      await sleep(0.02);
+      setRobotState(newpath[i]);
+      if (traceEnabled) {
+        updatePathHistory(path[i]);
+        setTraceEnabled(false);
       }
-    };
+    }
+  };
 
   // Function to start the animation
   const startAnimation = async () => {
@@ -611,7 +604,7 @@ export default function Simulator() {
 
   /// Example addition to the robot movement logic
   const updatePathHistory = (pathObj) => {
-      setPathHistory(prev => [...prev, { ...pathObj }]);
+    setPathHistory((prev) => [...prev, { ...pathObj }]);
   };
 
   // Function to clear the trace
@@ -620,7 +613,6 @@ export default function Simulator() {
     setPathHistory([]);
     setTraceEnabled(true); // Re-enable tracing for new paths
   };
-
 
   useEffect(() => {
     if (page >= path.length) return;
@@ -705,11 +697,12 @@ export default function Simulator() {
                 return (
                   <div
                     key={ob}
-                    className="flex justify-between items-center bg-white rounded-lg shadow-md p-3 border border-purple-300"
+                    className="flex justify-evenly items-center bg-white rounded-lg shadow-md p-3 border border-purple-300 text-purple-800 hover:-translate-y-2 hover:scale-105 hover:bg-purple-800 hover:text-white transition duration-150 ease-in-out"
                   >
-                    <div flex flex-col className="text-purple-800">
-                      <div className="font-semibold">X: {ob.x}</div>
-                      <div className="font-semibold">Y: {ob.y}</div>
+                    <div className="flex flex-col">
+                      <div className="font-semibold">
+                        (x:{ob.x} , y:{ob.y})
+                      </div>
                       <div className="font-semibold">
                         D: {DirectionToString[ob.d]}
                       </div>
@@ -719,7 +712,7 @@ export default function Simulator() {
                         xmlns="http://www.w3.org/2000/svg"
                         fill="none"
                         viewBox="0 0 24 24"
-                        className="inline-block w-4 h-4 stroke-black hover:cursor-pointer"
+                        className="inline-block w-4 h-4 stroke-red-500 hover:cursor-pointer hover:bg-red-500 hover:rounded-lg hover:stroke-white transition duration-150 ease-in-out"
                         onClick={() => onRemoveObstacle(ob)}
                       >
                         <path
@@ -747,7 +740,7 @@ export default function Simulator() {
               </div>
 
               <button
-                className="bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold py-2 px-4 rounded shadow-lg hover:from-orange-600 hover:to-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
+                className="bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold py-2 px-4 rounded shadow-lg hover:from-orange-600 hover:to-orange-700 hover:scale-105 active:scale-90 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
                 onClick={saveConfig}
               >
                 Save Configuration
@@ -766,23 +759,24 @@ export default function Simulator() {
         setConfigs={setConfigurations}
       />
 
+      {/* Settings Buttons */}
       <div className="py-4 flex justify-center gap-4">
         <button
-          className="bg-gradient-to-r from-purple-600 to-purple-700 text-white font-bold py-2 px-4 rounded shadow-lg hover:from-purple-700 hover:to-purple-800 focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-opacity-50 transition duration-150 ease-in-out"
+          className="bg-gradient-to-r from-purple-600 to-purple-700 text-white font-bold py-2 px-4 rounded shadow-lg hover:from-purple-700 hover:to-purple-800 hover:scale-105 active:scale-90 focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-opacity-50 transition duration-150 ease-in-out"
           onClick={onResetAll}
         >
           Reset All
         </button>
 
         <button
-          className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white font-bold py-2 px-4 rounded shadow-lg hover:from-yellow-600 hover:to-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
+          className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white font-bold py-2 px-4 rounded shadow-lg hover:from-yellow-600 hover:to-yellow-700 hover:scale-105 active:scale-90 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
           onClick={onReset}
         >
           Reset Robot
         </button>
 
         <button
-          className="bg-gradient-to-r from-green-500 to-green-600 text-white font-bold py-2 px-4 rounded shadow-lg hover:from-green-600 hover:to-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
+          className="bg-gradient-to-r from-green-500 to-green-600 text-white font-bold py-2 px-4 rounded shadow-lg hover:from-green-600 hover:to-green-700 hover:scale-105 active:scale-90 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
           onClick={compute}
         >
           Submit
@@ -799,38 +793,43 @@ export default function Simulator() {
       {/* Animation controls */}
       <div className="flex justify-center gap-4 py-4">
         <button
-          className="bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold py-2 px-4 rounded shadow-lg hover:from-blue-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
+          className="bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold py-2 px-4 rounded shadow-lg hover:from-blue-600 hover:to-blue-700 hover:scale-105 active:scale-90 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
           onClick={startImmediate}
         >
           Immediate
         </button>
 
         <button
-          className="bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold py-2 px-4 rounded shadow-lg hover:from-blue-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
+          className="bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold py-2 px-4 rounded shadow-lg hover:from-blue-600 hover:to-blue-700 hover:scale-105 active:scale-90 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
           onClick={startAnimation}
         >
           Start Animation
         </button>
 
         <button
-          className="bg-gradient-to-r from-red-500 to-red-600 text-white font-bold py-2 px-4 rounded shadow-lg hover:from-red-600 hover:to-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
+          className="bg-gradient-to-r from-red-500 to-red-600 text-white font-bold py-2 px-4 rounded shadow-lg hover:from-red-600 hover:to-red-700 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 active:scale-90 transition duration-150 ease-in-out"
           onClick={clearAnimation}
         >
           Clear
         </button>
 
         <button
-          className={`btn ${leaveTrace ? "bg-green-500 hover:bg-green-600" : "bg-red-500 hover:bg-red-600"} text-white font-bold py-2 px-4 rounded shadow-lg focus:outline-none focus:ring-2 transition duration-150 ease-in-out`}
-          onClick={() => setLeaveTrace(!leaveTrace)}>
+          className={`${
+            leaveTrace
+              ? "bg-green-500 hover:bg-green-600 focus:ring-green-500"
+              : "bg-red-500 hover:bg-red-600 focus:ring-red-500"
+          } text-white font-bold py-2 px-4 rounded shadow-lg hover:scale-105 transition duration-150 ease-in-out focus:outline-none focus:ring-2 active:scale-90`}
+          onClick={() => setLeaveTrace(!leaveTrace)}
+        >
           {leaveTrace ? "Leave Trace: ON" : "Leave Trace: OFF"}
         </button>
 
         <button
-          className="bg-gradient-to-r from-red-500 to-red-600 text-white font-bold py-2 px-4 rounded shadow-lg hover:from-red-600 hover:to-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
-          onClick={clearTrace}>
+          className="bg-gradient-to-r from-red-500 to-red-600 text-white font-bold py-2 px-4 rounded shadow-lg hover:from-red-600 hover:to-red-700 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 active:scale-90 transition duration-150 ease-in-out"
+          onClick={clearTrace}
+        >
           Clear Trace
         </button>
-
       </div>
 
       <div className="flex flex-row w-full max-w-6xl">
@@ -864,8 +863,12 @@ export default function Simulator() {
             <h2 className="text-xl font-semibold text-purple-700 mb-2">
               Fastest Path
             </h2>
-            <h2 className="text-xl font-semibold">Distance: {distance}cm</h2>
-            <h2 className="text-xl font-semibold">Timing: {duration}s</h2>
+            <h2 className="text-xl font-semibold text-purple-500">
+              Distance: {distance}cm
+            </h2>
+            <h2 className="text-xl font-semibold text-purple-500">
+              Timing: {duration}s
+            </h2>
           </div>
         </div>
       </div>
