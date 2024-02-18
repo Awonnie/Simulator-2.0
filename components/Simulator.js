@@ -97,6 +97,7 @@ export default function Simulator() {
   const [leaveTrace, setLeaveTrace] = useState(false); // Default to not leaving a trace
   const [pathHistory, setPathHistory] = useState([]);
   const [traceEnabled, setTraceEnabled] = useState(true);
+  const [isDragging, setIsDragging] = useState(false);
 
   const generateNewID = () => {
     while (true) {
@@ -355,6 +356,34 @@ export default function Simulator() {
     setPage(0);
   };
 
+  const dragStart = (e, ob) => {
+    console.log(ob);
+    e.dataTransfer.setData("draggedOb", JSON.stringify(ob));
+  };
+
+  const dragOver = (e) => {
+    e.preventDefault();
+    e.target.classList.add("bg-gray-600");
+  };
+
+  const dragOut = (e) => {
+    e.target.classList.remove("bg-gray-600");
+  };
+
+  const handleDrop = (e, newOb) => {
+    setIsDragging(false);
+    const obToDelete = JSON.parse(e.dataTransfer.getData("draggedOb"));
+    const obToAdd = {
+      ...newOb,
+      d: obToDelete.d,
+      id: hashString(`${newOb.x}-${newOb.y}-${obToDelete.d}`),
+    };
+    let newObstacles = obstacles.filter((ob) => ob.id !== obToDelete.id);
+    newObstacles.push(obToAdd);
+    console.log("Updated obstacles?:", newObstacles);
+    setObstacles(newObstacles);
+  };
+
   const renderGrid = () => {
     // Initialize the empty rows array
     const rows = [];
@@ -418,29 +447,37 @@ export default function Simulator() {
           if (foundOb.d === Direction.WEST) {
             cells.push(
               <td
-                className="border border-l-4 border-l-red-500 w-5 h-5 md:w-8 md:h-8 bg-blue-700 transition duration-150 ease-in-out hover:cursor-pointer hover:scale-125 active:rotate-90 hover:border-l-red-500 hover:border-l-4"
+                className="border border-l-4 border-l-red-500 w-5 h-5 md:w-8 md:h-8 bg-blue-700 transition duration-150 ease-in-out hover:cursor-pointer hover:bg-green-600 active:bg-red-500 active:scale-90  hover:border-l-red-500 hover:border-l-4"
                 onClick={() => changeOrientation(foundOb)}
+                draggable
+                onDragStart={(e) => dragStart(e, foundOb)}
               />
             );
           } else if (foundOb.d === Direction.EAST) {
             cells.push(
               <td
-                className="border border-r-4 border-r-red-500 w-5 h-5 md:w-8 md:h-8 bg-blue-700 transition duration-150 ease-in-out hover:cursor-pointer hover:scale-125 active:rotate-90 hover:border-r-red-500 hover:border-r-4"
+                className="border border-r-4 border-r-red-500 w-5 h-5 md:w-8 md:h-8 bg-blue-700 transition duration-150 ease-in-out hover:cursor-pointer hover:bg-green-600 active:bg-red-500 active:scale-90  hover:border-r-red-500 hover:border-r-4"
                 onClick={() => changeOrientation(foundOb)}
+                draggable
+                onDragStart={(e) => dragStart(e, foundOb)}
               />
             );
           } else if (foundOb.d === Direction.NORTH) {
             cells.push(
               <td
-                className="border border-t-4 border-t-red-500 w-5 h-5 md:w-8 md:h-8 bg-blue-700 transition duration-150 ease-in-out hover:cursor-pointer hover:scale-125 active:rotate-90 hover:border-t-red-500 hover:border-t-4"
+                className="border border-t-4 border-t-red-500 w-5 h-5 md:w-8 md:h-8 bg-blue-700 transition duration-150 ease-in-out hover:cursor-pointer hover:bg-green-600 active:bg-red-500 active:scale-90 hover:border-t-red-500 hover:border-t-4"
                 onClick={() => changeOrientation(foundOb)}
+                draggable
+                onDragStart={(e) => dragStart(e, foundOb)}
               />
             );
           } else if (foundOb.d === Direction.SOUTH) {
             cells.push(
               <td
-                className="border border-b-4 border-b-red-500 w-5 h-5 md:w-8 md:h-8 bg-blue-700 transition duration-150 ease-in-out hover:cursor-pointer hover:scale-125 active:rotate-90 hover:border-b-red-500 hover:border-b-4"
+                className="border border-b-4 border-b-red-500 w-5 h-5 md:w-8 md:h-8 bg-blue-700 transition duration-150 ease-in-out hover:cursor-pointer hover:bg-green-600 active:bg-red-500 active:scale-90  hover:border-b-red-500 hover:border-b-4"
                 onClick={() => changeOrientation(foundOb)}
+                draggable
+                onDragStart={(e) => dragStart(e, foundOb)}
               />
             );
           } else if (foundOb.d === Direction.SKIP) {
@@ -478,6 +515,9 @@ export default function Simulator() {
             <td
               className="border-black border w-5 h-5 md:w-8 md:h-8 hover:bg-blue-700 cursor-pointer transition"
               onClick={() => onClickObstacle(ob)}
+              onDragOver={(e) => dragOver(e)}
+              onDragLeave={(e) => dragOut(e)}
+              onDrop={(e) => handleDrop(e, ob)}
             />
           );
         }
