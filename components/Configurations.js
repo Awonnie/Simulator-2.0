@@ -34,7 +34,7 @@ export default function Configurations({
       {configList && (
         <div className="bg-white rounded-xl shadow-xl mb-8 p-4 w-full max-w-4xl">
           <div className="card-body items-center text-center p-4">
-            <h2 className="text-xl font-semibold text-purple-700 mb-5">
+            <h2 className="mb-5 text-xl font-semibold bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-transparent bg-clip-text">
               Configurations
             </h2>
             <div className="container flex-col">
@@ -44,7 +44,7 @@ export default function Configurations({
                     <p className="font-bold text-black text-center">{key}</p>
                   </div>
                   <button
-                    className="bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold py-2 px-4 rounded shadow-lg hover:from-orange-600 hover:to-orange-700 hover:scale-105 active:scale-90 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
+                    className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white font-bold py-2 px-4 rounded shadow-lg hover:scale-105 active:scale-90 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
                     onClick={() => loadConfig(key, value)}
                   >
                     Load

@@ -683,21 +683,20 @@ export default function Simulator() {
 
   return (
     <div className="flex flex-col items-center justify-center p-6 bg-gray-50">
-      <div className="text-center mb-8">
-        <h2 className="text-2xl font-bold text-purple-700">
-          MDP AY23/24 Group 7 Algorithm Simulator
-        </h2>
-      </div>
-
       {/* Robot Position */}
       <div className="bg-white rounded-xl shadow-xl mb-8 p-4 w-full max-w-4xl">
         <div className="card-body items-center text-center p-4">
-          <h2 className="text-xl font-semibold text-purple-700">
+          <h2 className="text-2xl font-bold bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 text-transparent bg-clip-text">
+            MDP AY23/24 Group 7 Algorithm Simulator
+          </h2>
+          <h2 className="text-xl font-semibold bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 text-transparent bg-clip-text">
             Robot Position
           </h2>
           <div className="form-control mt-4">
             <label className="input-group input-group-horizontal">
-              <span className="bg-purple-500 text-white p-2 rounded-l">X</span>
+              <span className="bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 text-white p-2 rounded-l">
+                X
+              </span>
               <input
                 onChange={onChangeRobotX}
                 type="number"
@@ -706,7 +705,9 @@ export default function Simulator() {
                 max="18"
                 className="input input-bordered text-purple-900"
               />
-              <span className="bg-purple-500 text-white p-2">Y</span>
+              <span className="bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 text-white p-2">
+                Y
+              </span>
               <input
                 onChange={onChangeRobotY}
                 type="number"
@@ -715,7 +716,9 @@ export default function Simulator() {
                 max="18"
                 className="input input-bordered text-purple-900"
               />
-              <span className="bg-purple-500 text-white p-2">D</span>
+              <span className="bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 text-white p-2">
+                D
+              </span>
               <select
                 onChange={onRobotDirectionInputChange}
                 value={robotDir}
@@ -727,7 +730,7 @@ export default function Simulator() {
                 <option value={ObDirection.EAST}>Right</option>
               </select>
               <button
-                className="btn bg-purple-600 hover:bg-purple-700 text-white p-2 rounded-r"
+                className="bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 text-white p-2 font-bold rounded-r"
                 onClick={onClickRobot}
               >
                 Set
@@ -738,21 +741,21 @@ export default function Simulator() {
         {/* Settings Buttons */}
         <div className="py-4 flex justify-center gap-4">
           <button
-            className="bg-gradient-to-r from-purple-600 to-purple-700 text-white font-bold py-2 px-4 rounded shadow-lg hover:from-purple-700 hover:to-purple-800 hover:scale-105 active:scale-90 focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-opacity-50 transition duration-150 ease-in-out"
+            className="border-2 border-purple-500 bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 text-transparent bg-clip-text font-bold py-2 px-4 rounded shadow-lg hover:text-white hover:bg-clip-border hover:border-white hover:rounded-md hover:scale-105 active:scale-90 transition duration-150 ease-in-out"
             onClick={onResetAll}
           >
             Reset All
           </button>
 
           <button
-            className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white font-bold py-2 px-4 rounded shadow-lg hover:from-yellow-600 hover:to-yellow-700 hover:scale-105 active:scale-90 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
+            className="border-2 border-yellow-400 bg-gradient-to-tr from-orange-400 via-yellow-400 to-pink-400 text-transparent font-bold py-2 px-4 rounded bg-clip-text shadow-lg hover:scale-105 hover:bg-clip-border hover:text-white hover:rounded-md hover:border-none active:scale-90 transition duration-150 ease-in-out"
             onClick={onReset}
           >
             Reset Robot
           </button>
 
           <button
-            className="bg-gradient-to-r from-green-500 to-green-600 text-white font-bold py-2 px-4 rounded shadow-lg hover:from-green-600 hover:to-green-700 hover:scale-105 active:scale-90 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
+            className="border-2 border-cyan-400 bg-gradient-to-tr from-green-400 via-cyan-400 to-orange-200 text-transparent bg-clip-text font-bold py-2 px-4 rounded shadow-lg hover:scale-105 active:scale-90 hover:bg-clip-border hover:border-none hover:text-white transition duration-150 ease-in-out"
             onClick={compute}
           >
             Submit
@@ -772,21 +775,21 @@ export default function Simulator() {
             {/* Animation controls */}
             <div className="flex justify-center gap-4 py-4">
               <button
-                className="bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold py-2 px-4 rounded shadow-lg hover:from-blue-600 hover:to-blue-700 hover:scale-105 active:scale-90 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
+                className="bg-gradient-to-tr from-blue-500 to-blue-600 text-white font-bold py-2 px-4 rounded shadow-lg hover:from-blue-600 hover:to-blue-700 hover:scale-105 active:scale-90 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
                 onClick={startImmediate}
               >
                 Immediate
               </button>
 
               <button
-                className="bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold py-2 px-4 rounded shadow-lg hover:from-blue-600 hover:to-blue-700 hover:scale-105 active:scale-90 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
+                className="bg-gradient-to-tr from-blue-500 to-blue-600 text-white font-bold py-2 px-4 rounded shadow-lg hover:from-blue-600 hover:to-blue-700 hover:scale-105 active:scale-90 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
                 onClick={startAnimation}
               >
                 Start Animation
               </button>
 
               <button
-                className="bg-gradient-to-r from-red-500 to-red-600 text-white font-bold py-2 px-4 rounded shadow-lg hover:from-red-600 hover:to-red-700 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 active:scale-90 transition duration-150 ease-in-out"
+                className="bg-gradient-to-tr from-red-500 to-red-600 text-white font-bold py-2 px-4 rounded shadow-lg hover:from-red-600 hover:to-red-700 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 active:scale-90 transition duration-150 ease-in-out"
                 onClick={clearAnimation}
               >
                 Clear
@@ -804,7 +807,7 @@ export default function Simulator() {
               </button>
 
               <button
-                className="bg-gradient-to-r from-red-500 to-red-600 text-white font-bold py-2 px-4 rounded shadow-lg hover:from-red-600 hover:to-red-700 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 active:scale-90 transition duration-150 ease-in-out"
+                className="bg-gradient-to-tr from-red-500 to-red-600 text-white font-bold py-2 px-4 rounded shadow-lg hover:from-red-600 hover:to-red-700 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 active:scale-90 transition duration-150 ease-in-out"
                 onClick={clearTrace}
               >
                 Clear Trace
@@ -815,9 +818,9 @@ export default function Simulator() {
       </div>
 
       {/* Grid */}
-      <div className="flex justify-center flex-row w-full max-w-6xl my-4">
-        <div className="w-3/4 pr-4">
-          <table className="border-collapse border border-purple-500 w-full text-sm">
+      <div className="flex justify-center w-full max-w-6xl my-4">
+        <div className="w-3/4 flex justify-center">
+          <table className="content-right border-collapse border border-purple-500 w-auto text-sm">
             <tbody>
               {renderGrid()}{" "}
               {/* Ensure this function outputs rows and cells with appropriate styling */}
@@ -864,7 +867,7 @@ export default function Simulator() {
       {obstacles.length > 0 && (
         <div className="bg-white rounded-xl shadow-xl mb-8 p-4 w-full max-w-4xl">
           <div className="card-body items-center text-center p-4">
-            <h2 className="text-xl font-semibold text-purple-700">
+            <h2 className="text-xl font-semibold bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 text-transparent bg-clip-text">
               Current Obstacles
             </h2>
             <div className="grid grid-cols-5 gap-5 p-5">
@@ -891,7 +894,7 @@ export default function Simulator() {
               })}
             </div>
             <div className="container flex justify-evenly">
-              <div className="flex justify-between rounded-md bg-gradient-to-r from-orange-300 to-orange-700 w-1/2">
+              <div className="flex justify-between rounded-md bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 w-1/2">
                 <p className="font-bold">Config Name:</p>
                 <input
                   type="text"
@@ -903,7 +906,7 @@ export default function Simulator() {
               </div>
 
               <button
-                className="bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold py-2 px-4 rounded shadow-lg hover:from-orange-600 hover:to-orange-700 hover:scale-105 active:scale-90 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
+                className="bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 text-white font-bold py-2 px-4 rounded shadow-lg hover:scale-105 active:scale-90 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
                 onClick={saveConfig}
               >
                 Save Configuration
