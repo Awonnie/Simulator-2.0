@@ -97,7 +97,6 @@ export default function Simulator() {
   const [leaveTrace, setLeaveTrace] = useState(false); // Default to not leaving a trace
   const [pathHistory, setPathHistory] = useState([]);
   const [traceEnabled, setTraceEnabled] = useState(true);
-  const [isDragging, setIsDragging] = useState(false);
 
   const generateNewID = () => {
     while (true) {
@@ -374,7 +373,6 @@ export default function Simulator() {
   };
 
   const handleDrop = (e, newOb) => {
-    setIsDragging(false);
     const obToDelete = JSON.parse(e.dataTransfer.getData("draggedOb"));
     const obToAdd = {
       ...newOb,
@@ -737,7 +735,130 @@ export default function Simulator() {
             </label>
           </div>
         </div>
+        {/* Settings Buttons */}
+        <div className="py-4 flex justify-center gap-4">
+          <button
+            className="bg-gradient-to-r from-purple-600 to-purple-700 text-white font-bold py-2 px-4 rounded shadow-lg hover:from-purple-700 hover:to-purple-800 hover:scale-105 active:scale-90 focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-opacity-50 transition duration-150 ease-in-out"
+            onClick={onResetAll}
+          >
+            Reset All
+          </button>
+
+          <button
+            className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white font-bold py-2 px-4 rounded shadow-lg hover:from-yellow-600 hover:to-yellow-700 hover:scale-105 active:scale-90 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
+            onClick={onReset}
+          >
+            Reset Robot
+          </button>
+
+          <button
+            className="bg-gradient-to-r from-green-500 to-green-600 text-white font-bold py-2 px-4 rounded shadow-lg hover:from-green-600 hover:to-green-700 hover:scale-105 active:scale-90 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
+            onClick={compute}
+          >
+            Submit
+          </button>
+        </div>
+
+        {path.length > 0 && (
+          <div>
+            {/* Timer display */}
+            <div className="text-center mt-4">
+              <h2 className="font-semibold text-xl text-purple-700">
+                Timer:{" "}
+                <span className="text-purple-500">{formatTimer(timer)}</span>
+              </h2>
+            </div>
+
+            {/* Animation controls */}
+            <div className="flex justify-center gap-4 py-4">
+              <button
+                className="bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold py-2 px-4 rounded shadow-lg hover:from-blue-600 hover:to-blue-700 hover:scale-105 active:scale-90 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
+                onClick={startImmediate}
+              >
+                Immediate
+              </button>
+
+              <button
+                className="bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold py-2 px-4 rounded shadow-lg hover:from-blue-600 hover:to-blue-700 hover:scale-105 active:scale-90 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
+                onClick={startAnimation}
+              >
+                Start Animation
+              </button>
+
+              <button
+                className="bg-gradient-to-r from-red-500 to-red-600 text-white font-bold py-2 px-4 rounded shadow-lg hover:from-red-600 hover:to-red-700 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 active:scale-90 transition duration-150 ease-in-out"
+                onClick={clearAnimation}
+              >
+                Clear
+              </button>
+
+              <button
+                className={`${
+                  leaveTrace
+                    ? "bg-green-500 hover:bg-green-600 focus:ring-green-500"
+                    : "bg-red-500 hover:bg-red-600 focus:ring-red-500"
+                } text-white font-bold py-2 px-4 rounded shadow-lg hover:scale-105 transition duration-150 ease-in-out focus:outline-none focus:ring-2 active:scale-90`}
+                onClick={() => setLeaveTrace(!leaveTrace)}
+              >
+                {leaveTrace ? "Leave Trace: ON" : "Leave Trace: OFF"}
+              </button>
+
+              <button
+                className="bg-gradient-to-r from-red-500 to-red-600 text-white font-bold py-2 px-4 rounded shadow-lg hover:from-red-600 hover:to-red-700 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 active:scale-90 transition duration-150 ease-in-out"
+                onClick={clearTrace}
+              >
+                Clear Trace
+              </button>
+            </div>
+          </div>
+        )}
       </div>
+
+      {/* Grid */}
+      <div className="flex justify-center flex-row w-full max-w-6xl my-4">
+        <div className="w-3/4 pr-4">
+          <table className="border-collapse border border-purple-500 w-full text-sm">
+            <tbody>
+              {renderGrid()}{" "}
+              {/* Ensure this function outputs rows and cells with appropriate styling */}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Path Info */}
+      {path.length > 0 && (
+        <div>
+          {/* List of path commands */}
+          <div className="w-1/4">
+            <div className="flex flex-col items-center text-center bg-purple-100 p-4 rounded-xl shadow-md">
+              <h2 className="text-xl font-semibold text-purple-700 mb-2">
+                Path Commands
+              </h2>
+              {commands.map((_, index) => (
+                <div key={index} className="text-purple-800 py-1">
+                  {`Step ${index + 1}: ${commands[index]}`}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* For last checkpoint */}
+          <div className="w-1/4">
+            <div className="flex flex-col items-center text-center bg-purple-100 p-4 rounded-xl shadow-md">
+              <h2 className="text-xl font-semibold text-purple-700 mb-2">
+                Fastest Path
+              </h2>
+              <h2 className="text-xl font-semibold text-purple-500">
+                Distance: {distance}cm
+              </h2>
+              <h2 className="text-xl font-semibold text-purple-500">
+                Timing: {duration}s
+              </h2>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Obstacle List View */}
       {obstacles.length > 0 && (
@@ -808,120 +929,6 @@ export default function Simulator() {
         configs={configurations}
         setConfigs={setConfigurations}
       />
-
-      {/* Settings Buttons */}
-      <div className="py-4 flex justify-center gap-4">
-        <button
-          className="bg-gradient-to-r from-purple-600 to-purple-700 text-white font-bold py-2 px-4 rounded shadow-lg hover:from-purple-700 hover:to-purple-800 hover:scale-105 active:scale-90 focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-opacity-50 transition duration-150 ease-in-out"
-          onClick={onResetAll}
-        >
-          Reset All
-        </button>
-
-        <button
-          className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white font-bold py-2 px-4 rounded shadow-lg hover:from-yellow-600 hover:to-yellow-700 hover:scale-105 active:scale-90 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
-          onClick={onReset}
-        >
-          Reset Robot
-        </button>
-
-        <button
-          className="bg-gradient-to-r from-green-500 to-green-600 text-white font-bold py-2 px-4 rounded shadow-lg hover:from-green-600 hover:to-green-700 hover:scale-105 active:scale-90 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
-          onClick={compute}
-        >
-          Submit
-        </button>
-      </div>
-
-      {/* Timer display */}
-      <div className="text-center mt-4">
-        <h2 className="font-semibold text-xl text-purple-700">
-          Timer: <span className="text-purple-500">{formatTimer(timer)}</span>
-        </h2>
-      </div>
-
-      {/* Animation controls */}
-      <div className="flex justify-center gap-4 py-4">
-        <button
-          className="bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold py-2 px-4 rounded shadow-lg hover:from-blue-600 hover:to-blue-700 hover:scale-105 active:scale-90 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
-          onClick={startImmediate}
-        >
-          Immediate
-        </button>
-
-        <button
-          className="bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold py-2 px-4 rounded shadow-lg hover:from-blue-600 hover:to-blue-700 hover:scale-105 active:scale-90 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
-          onClick={startAnimation}
-        >
-          Start Animation
-        </button>
-
-        <button
-          className="bg-gradient-to-r from-red-500 to-red-600 text-white font-bold py-2 px-4 rounded shadow-lg hover:from-red-600 hover:to-red-700 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 active:scale-90 transition duration-150 ease-in-out"
-          onClick={clearAnimation}
-        >
-          Clear
-        </button>
-
-        <button
-          className={`${
-            leaveTrace
-              ? "bg-green-500 hover:bg-green-600 focus:ring-green-500"
-              : "bg-red-500 hover:bg-red-600 focus:ring-red-500"
-          } text-white font-bold py-2 px-4 rounded shadow-lg hover:scale-105 transition duration-150 ease-in-out focus:outline-none focus:ring-2 active:scale-90`}
-          onClick={() => setLeaveTrace(!leaveTrace)}
-        >
-          {leaveTrace ? "Leave Trace: ON" : "Leave Trace: OFF"}
-        </button>
-
-        <button
-          className="bg-gradient-to-r from-red-500 to-red-600 text-white font-bold py-2 px-4 rounded shadow-lg hover:from-red-600 hover:to-red-700 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 active:scale-90 transition duration-150 ease-in-out"
-          onClick={clearTrace}
-        >
-          Clear Trace
-        </button>
-      </div>
-
-      <div className="flex flex-row w-full max-w-6xl">
-        {/* Grid */}
-        <div className="w-3/4 pr-4">
-          <table className="border-collapse border border-purple-500 w-full text-sm">
-            <tbody>
-              {renderGrid()}{" "}
-              {/* Ensure this function outputs rows and cells with appropriate styling */}
-            </tbody>
-          </table>
-        </div>
-
-        {/* List of path commands */}
-        <div className="w-1/4">
-          <div className="flex flex-col items-center text-center bg-purple-100 p-4 rounded-xl shadow-md">
-            <h2 className="text-xl font-semibold text-purple-700 mb-2">
-              Path Commands
-            </h2>
-            {commands.map((_, index) => (
-              <div key={index} className="text-purple-800 py-1">
-                {`Step ${index + 1}: ${commands[index]}`}
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* For last checkpoint */}
-        <div className="w-1/4">
-          <div className="flex flex-col items-center text-center bg-purple-100 p-4 rounded-xl shadow-md">
-            <h2 className="text-xl font-semibold text-purple-700 mb-2">
-              Fastest Path
-            </h2>
-            <h2 className="text-xl font-semibold text-purple-500">
-              Distance: {distance}cm
-            </h2>
-            <h2 className="text-xl font-semibold text-purple-500">
-              Timing: {duration}s
-            </h2>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }
