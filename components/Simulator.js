@@ -287,9 +287,12 @@ export default function Simulator() {
     setRobotDir(event.target.value);
   };
 
-  const onRemoveObstacle = (ob) => {
+  const deleteObInfo = (e) => {
+    offDelete(e);
     // If the path is not empty or the algorithm is computing, return
     if (path.length > 0 || isComputing) return;
+
+    const ob = JSON.parse(e.dataTransfer.getData("obInfo"));
     // Filter out the target obstacle
     const newObstacles = obstacles.filter((o) => o.id !== ob.id);
     // Set the obstacles to the new array
@@ -654,6 +657,17 @@ export default function Simulator() {
     setTraceEnabled(true); // Re-enable tracing for new paths
   };
 
+  const onDelete = (e) => {
+    e.preventDefault();
+    e.target.classList.remove("text-red-500");
+    e.target.classList.add("text-white", "bg-red-500", "scale-125");
+  };
+
+  const offDelete = (e) => {
+    e.target.classList.remove("text-white", "bg-red-500", "scale-125");
+    e.target.classList.add("text-red-500");
+  };
+
   useEffect(() => {
     if (page >= path.length) return;
     setRobotState(path[page]);
@@ -737,7 +751,11 @@ export default function Simulator() {
                 return (
                   <div
                     key={ob}
-                    className="flex justify-evenly items-center bg-white rounded-lg shadow-md p-3 border border-purple-300 text-purple-800 hover:-translate-y-2 hover:scale-105 hover:bg-purple-800 hover:text-white transition duration-150 ease-in-out"
+                    className="flex justify-evenly items-center bg-white rounded-lg shadow-md p-3 border border-purple-300 text-purple-800 cursor-pointer hover:-translate-y-2 hover:scale-105 hover:bg-purple-800 hover:text-white transition duration-150 ease-in-out"
+                    draggable
+                    onDragStart={(e) =>
+                      e.dataTransfer.setData("ObInfo", JSON.stringify(ob))
+                    }
                   >
                     <div className="flex flex-col">
                       <div className="font-semibold">
@@ -747,28 +765,12 @@ export default function Simulator() {
                         D: {DirectionToString[ob.d]}
                       </div>
                     </div>
-                    <div>
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        className="inline-block w-4 h-4 stroke-red-500 hover:cursor-pointer hover:bg-red-500 hover:rounded-lg hover:stroke-white transition duration-150 ease-in-out"
-                        onClick={() => onRemoveObstacle(ob)}
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M6 18L18 6M6 6l12 12"
-                        ></path>
-                      </svg>
-                    </div>
                   </div>
                 );
               })}
             </div>
-            <div className="container flex justify-center">
-              <div className="flex justify-center rounded-md bg-gradient-to-r from-orange-300 to-orange-700 mr-4 w-1/2">
+            <div className="container flex justify-evenly">
+              <div className="flex justify-between rounded-md bg-gradient-to-r from-orange-300 to-orange-700 w-1/2">
                 <p className="font-bold">Config Name:</p>
                 <input
                   type="text"
@@ -784,6 +786,14 @@ export default function Simulator() {
                 onClick={saveConfig}
               >
                 Save Configuration
+              </button>
+              <button
+                className="border-4 border-red-500 rounded px-4 text-red-500 font-bold cursor-default transition duration-150 ease-in-out"
+                onDragOver={(e) => onDelete(e)}
+                onDragLeave={(e) => offDelete(e)}
+                onDrop={(e) => deleteObInfo(e)}
+              >
+                Delete
               </button>
             </div>
           </div>
