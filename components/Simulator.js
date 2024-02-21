@@ -831,9 +831,9 @@ export default function Simulator() {
 
       {/* Path Info */}
       {path.length > 0 && (
-        <div>
+        <div className="container flex justify-center my-4">
           {/* List of path commands */}
-          <div className="w-1/4">
+          <div className="w-3/4">
             <div className="flex flex-col items-center text-center bg-purple-100 p-4 rounded-xl shadow-md">
               <h2 className="text-xl font-semibold text-purple-700 mb-2">
                 Path Commands
