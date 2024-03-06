@@ -1,10 +1,8 @@
-import dynamic from "next/dynamic";
-import { useEffect, useRef, useState } from "react";
-import QueryAPI from "./QueryAPI";
+"use client";
 
-const Configurations = dynamic(() => import("./Configurations"), {
-  ssr: false,
-});
+import { useEffect, useRef, useState } from "react";
+import Configurations from "./Configurations";
+import QueryAPI from "./QueryAPI";
 
 const Direction = {
   NORTH: 0,
@@ -73,7 +71,7 @@ function interpolatePath(path) {
   return interpolatedPath;
 }
 
-export default function Simulator() {
+export default function Home() {
   const [robotState, setRobotState] = useState({
     x: 1,
     y: 1,
