@@ -189,7 +189,6 @@ export default function Home() {
 
     //If config is empty
     if (!haveConfig.current) {
-      console.log("For some reason, have config is still false");
       newConfigs[configName] = obstacles;
       haveConfig.current = true;
       setConfigurations(newConfigs);
@@ -215,12 +214,10 @@ export default function Home() {
 
       if (itExists) {
         if (name === configName) {
-          console.log("Name exists...");
           return;
         } //If it exists and the name is the same, you dont need to save, can just return
 
         //If it exists and the name is different, you need to update the name
-        console.log("Updating name...");
         delete newConfigs[name];
         break;
       }
@@ -312,8 +309,6 @@ export default function Home() {
         setDuration(data.data.duration);
         setDistance(data.data.distance); // Update this line to set the distance
 
-        console.log("Distance:", distance);
-        console.log("Duration:", duration);
         // Set the commands
         const commands = [];
         for (let x of data.data.commands) {
@@ -354,7 +349,6 @@ export default function Home() {
   };
 
   const dragStart = (e, ob) => {
-    console.log(ob);
     e.dataTransfer.setData("draggedOb", JSON.stringify(ob));
   };
 
@@ -376,7 +370,6 @@ export default function Home() {
     };
     let newObstacles = obstacles.filter((ob) => ob.id !== obToDelete.id);
     newObstacles.push(obToAdd);
-    console.log("Updated obstacles?:", newObstacles);
     setObstacles(newObstacles);
   };
 
@@ -609,7 +602,6 @@ export default function Home() {
   const startAnimation = async () => {
     isAnimating.current = true;
     startTimer();
-    console.log(path_duration);
     for (let i = 0; i < path_duration.length; i++) {
       if (!isAnimating.current) {
         setPage(0);
@@ -670,9 +662,6 @@ export default function Home() {
   useEffect(() => {
     if (haveConfig.current) {
       localStorage.setItem("Configurations", JSON.stringify(configurations));
-    }
-    if (obstacles.length > 0) {
-      console.log("Obstacles:", obstacles);
     }
   }, [obstacles, configurations]);
 
