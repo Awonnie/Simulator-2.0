@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 
-export default function Configurations({
+export default function PresetLoader({
   setConfigName,
   setObs,
   haveConfig,

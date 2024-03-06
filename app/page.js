@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Configurations from "./Configurations";
-import QueryAPI from "./QueryAPI";
+import PresetLoader from "./PresetLoader";
+import { QueryAPI } from "./helpers";
 
 const Direction = {
   NORTH: 0,
@@ -920,7 +920,7 @@ export default function Home() {
       )}
 
       {/* Configurations Loader */}
-      <Configurations
+      <PresetLoader
         setConfigName={setConfigName}
         setObs={setObstacles}
         haveConfig={haveConfig}
