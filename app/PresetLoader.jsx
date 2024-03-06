@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import Button from "./Button";
 
 export default function PresetLoader({
   setConfigName,
@@ -40,12 +41,12 @@ export default function PresetLoader({
                   <div className="w-1/2 flex items-center border-b-2 border-gray-300">
                     <p className="font-bold text-black text-center">{key}</p>
                   </div>
-                  <button
-                    className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white font-bold py-2 px-4 rounded shadow-lg hover:scale-105 active:scale-90 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
+                  <Button
+                    style={"primary"}
                     onClick={() => loadConfig(key, value)}
                   >
                     Load
-                  </button>
+                  </Button>
                 </div>
               ))}
             </div>

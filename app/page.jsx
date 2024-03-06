@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import PresetLoader from "./PresetLoader";
 import { QueryAPI } from "../helpers";
+import Button from "./Button";
 
 const Direction = {
   NORTH: 0,
@@ -724,30 +725,19 @@ export default function Home() {
         </div>
         {/* Settings Buttons */}
         <div className="py-4 flex justify-center gap-4">
-          <button
-            className="border-2 border-purple-500 bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 text-transparent bg-clip-text font-bold py-2 px-4 rounded shadow-lg hover:text-white hover:bg-clip-border hover:border-white hover:rounded-md hover:scale-105 active:scale-90 transition duration-150 ease-in-out"
-            onClick={onResetAll}
-          >
-            Reset All
-          </button>
-
-          <button
-            className="border-2 border-yellow-400 bg-gradient-to-tr from-orange-400 via-yellow-400 to-pink-400 text-transparent font-bold py-2 px-4 rounded bg-clip-text shadow-lg hover:scale-105 hover:bg-clip-border hover:text-white hover:rounded-md hover:border-none active:scale-90 transition duration-150 ease-in-out"
-            onClick={onReset}
-          >
+          <Button style={"secondaryOutline"} onClick={compute}>
             Reset Robot
-          </button>
-
-          <button
-            className="border-2 border-cyan-400 bg-gradient-to-tr from-green-400 via-cyan-400 to-orange-200 text-transparent bg-clip-text font-bold py-2 px-4 rounded shadow-lg hover:scale-105 active:scale-90 hover:bg-clip-border hover:border-none hover:text-white transition duration-150 ease-in-out"
-            onClick={compute}
-          >
+          </Button>
+          <Button style={"warningOutline"} onClick={compute}>
+            Reset Robot
+          </Button>
+          <Button style={"primaryOutline"} onClick={compute}>
             Submit
-          </button>
+          </Button>
         </div>
 
         {path.length > 0 && (
-          <div>
+          <div className="flex-col justify-center space-y-4">
             {/* Timer display */}
             <div className="text-center mt-4">
               <h2 className="font-semibold text-xl text-purple-700">
@@ -757,45 +747,71 @@ export default function Home() {
             </div>
 
             {/* Animation controls */}
-            <div className="flex justify-center gap-4 py-4">
-              <button
-                className="bg-gradient-to-tr from-blue-500 to-blue-600 text-white font-bold py-2 px-4 rounded shadow-lg hover:from-blue-600 hover:to-blue-700 hover:scale-105 active:scale-90 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
+            <div className="flex justify-center space-x-1">
+              <Button
+                style="btn btn-primary text-white"
                 onClick={startImmediate}
               >
-                Immediate
-              </button>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="32"
+                  height="32"
+                  fill="currentColor"
+                  class="bi bi-skip-forward-fill"
+                  viewBox="0 0 16 16"
+                >
+                  {" "}
+                  <path d="M15.5 3.5a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V8.753l-6.267 3.636c-.54.313-1.233-.066-1.233-.697v-2.94l-6.267 3.636C.693 12.703 0 12.324 0 11.693V4.308c0-.63.693-1.01 1.233-.696L7.5 7.248v-2.94c0-.63.693-1.01 1.233-.696L15 7.248V4a.5.5 0 0 1 .5-.5z" />{" "}
+                </svg>
+              </Button>
 
-              <button
-                className="bg-gradient-to-tr from-blue-500 to-blue-600 text-white font-bold py-2 px-4 rounded shadow-lg hover:from-blue-600 hover:to-blue-700 hover:scale-105 active:scale-90 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
+              <Button
+                style="btn btn-primary text-white"
                 onClick={startAnimation}
               >
                 Start Animation
-              </button>
+              </Button>
 
-              <button
-                className="bg-gradient-to-tr from-red-500 to-red-600 text-white font-bold py-2 px-4 rounded shadow-lg hover:from-red-600 hover:to-red-700 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 active:scale-90 transition duration-150 ease-in-out"
-                onClick={clearAnimation}
-              >
-                Clear
-              </button>
+              <Button style="btn btn-error text-white" onClick={clearAnimation}>
+                <svg
+                  width="32"
+                  height="32"
+                  viewBox="0 0 32 32"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <line
+                    x1="0"
+                    y1="32"
+                    x2="32"
+                    y2="0"
+                    stroke-width="2"
+                    stroke="currentColor"
+                  />
+                  <line
+                    x1="0"
+                    y1="0"
+                    x2="32"
+                    y2="32"
+                    stroke-width="2"
+                    stroke="currentColor"
+                  />
+                </svg>
+              </Button>
+            </div>
 
-              <button
-                className={`${
-                  leaveTrace
-                    ? "bg-green-500 hover:bg-green-600 focus:ring-green-500"
-                    : "bg-red-500 hover:bg-red-600 focus:ring-red-500"
-                } text-white font-bold py-2 px-4 rounded shadow-lg hover:scale-105 transition duration-150 ease-in-out focus:outline-none focus:ring-2 active:scale-90`}
+            <div className="flex justify-center space-x-1">
+              <Button
+                style={`btn ${
+                  leaveTrace ? "btn-secondary" : "btn-outline btn-secondary"
+                } text-white`}
                 onClick={() => setLeaveTrace(!leaveTrace)}
               >
                 {leaveTrace ? "Leave Trace: ON" : "Leave Trace: OFF"}
-              </button>
+              </Button>
 
-              <button
-                className="bg-gradient-to-tr from-red-500 to-red-600 text-white font-bold py-2 px-4 rounded shadow-lg hover:from-red-600 hover:to-red-700 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 active:scale-90 transition duration-150 ease-in-out"
-                onClick={clearTrace}
-              >
+              <Button style="btn btn-error text-white" onClick={clearTrace}>
                 Clear Trace
-              </button>
+              </Button>
             </div>
           </div>
         )}
@@ -889,20 +905,11 @@ export default function Home() {
                 />
               </div>
 
-              <button
-                className="bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 text-white font-bold py-2 px-4 rounded shadow-lg hover:scale-105 active:scale-90 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
-                onClick={saveConfig}
-              >
+              <Button style={"primary"} onClick={saveConfig}>
                 Save Configuration
-              </button>
-              <button
-                className="border-4 border-red-500 rounded px-4 text-red-500 font-bold cursor-default transition duration-150 ease-in-out"
-                onDragOver={(e) => onDelete(e)}
-                onDragLeave={(e) => offDelete(e)}
-                onDrop={(e) => deleteObInfo(e)}
-              >
-                Delete
-              </button>
+              </Button>
+
+              <Button style={"btn btn-error text-white"}>Delete</Button>
             </div>
           </div>
         </div>
