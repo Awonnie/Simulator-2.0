@@ -1,6 +1,6 @@
-import BaseAPI, { methodType } from "./BaseAPI";
+import { BaseAPI, methodType } from "./BaseAPI";
 
-export default class QueryAPI extends BaseAPI {
+export class QueryAPI extends BaseAPI {
   // Query the path from backend server
   static query(obstacles, robotX, robotY, robotDir, callback) {
     /* Construct the content of the request 

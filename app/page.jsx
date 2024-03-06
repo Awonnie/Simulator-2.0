@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import PresetLoader from "./PresetLoader";
-import QueryAPI from "./helpers";
+import { QueryAPI } from "../helpers";
 
 const Direction = {
   NORTH: 0,
