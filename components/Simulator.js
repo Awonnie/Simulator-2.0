@@ -307,11 +307,8 @@ export default function Simulator() {
         // If the data is valid, set the path
         setPath(data.data.path);
 
-        console.log("Path:", path);
-        console.log("New path:", newpath);
-
         // Path duration contains a list of the duration of each step
-        setPathDuration(data.data.path_time);
+        setPathDuration(data.data.path_execution_time);
 
         // Total Duration of the entire path
         setDuration(data.data.duration);
