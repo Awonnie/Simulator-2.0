@@ -3,17 +3,9 @@
 import { useEffect, useRef, useState } from "react";
 import PresetLoader from "./PresetLoader";
 import { QueryAPI } from "../helpers";
-import Button from "./Button";
+import Button from "./components/Button";
 
 const Direction = {
-  NORTH: 0,
-  EAST: 2,
-  SOUTH: 4,
-  WEST: 6,
-  SKIP: 8,
-};
-
-const ObDirection = {
   NORTH: 0,
   EAST: 2,
   SOUTH: 4,
@@ -659,9 +651,16 @@ export default function Home() {
     s: -1,
   });
 
+  const ObDirection = {
+    NORTH: 0,
+    EAST: 2,
+    SOUTH: 4,
+    WEST: 6,
+    SKIP: 8,
+  };
+
   return (
     <div className="flex flex-col items-center justify-center p-6 bg-gray-50">
-      {/* Robot Position */}
       <div className="bg-white rounded-xl shadow-xl mb-8 p-4 w-full max-w-4xl">
         <div className="card-body items-center text-center p-4">
           <h2 className="text-2xl font-bold purple-gradient text-transparent bg-clip-text">

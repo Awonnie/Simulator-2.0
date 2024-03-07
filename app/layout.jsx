@@ -1,5 +1,6 @@
 import "@/styles/custom-styles.css";
 import "@/styles/globals.css";
+import NavBarDrawer from "./NavBarDrawer";
 
 export const metadata = {
   title: "MDPGrp7",
@@ -13,7 +14,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body className="no-scrollbar">
+        <NavBarDrawer />
+        {children}
+      </body>
     </html>
   );
 }
