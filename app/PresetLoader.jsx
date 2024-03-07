@@ -42,7 +42,7 @@ export default function PresetLoader({
                     <p className="font-bold text-black text-center">{key}</p>
                   </div>
                   <Button
-                    style={"primary"}
+                    style={"gradient-btn-purple"}
                     onClick={() => loadConfig(key, value)}
                   >
                     Load

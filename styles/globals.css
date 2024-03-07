@@ -25,3 +25,31 @@ body {
     )
     rgb(var(--background-start-rgb));
 }
+
+@layer components {
+  .base-btn {
+    @apply bg-black text-white font-bold py-2 px-4 rounded active:scale-90  transition-all;
+  }
+
+  .outline-btn {
+    @apply base-btn border-2 border-black bg-white text-black hover:bg-black hover:text-white;
+  }
+
+  .outline-btn-red {
+    @apply base-btn border-2 border-red-500 bg-white text-red-500 hover:bg-red-500 hover:text-white;
+  }
+
+  .purple-gradient {
+    @apply bg-gradient-to-tr border-purple-500  from-indigo-500 via-purple-500 to-pink-500;
+  }
+
+  .gradient-btn-cyan {
+    @apply base-btn border-2 bg-gradient-to-tr border-cyan-400  from-green-400 via-cyan-400 to-orange-200 text-transparent bg-clip-text hover:bg-clip-border hover:border-white hover:text-white;
+  }
+  .gradient-btn-yellow {
+    @apply base-btn border-2 bg-gradient-to-tr border-yellow-400 from-orange-400 via-yellow-400 to-pink-400 text-transparent bg-clip-text hover:bg-clip-border hover:border-white hover:text-white;
+  }
+  .gradient-btn-purple {
+    @apply base-btn purple-gradient border-2 text-transparent bg-clip-text hover:bg-clip-border hover:border-white hover:text-white;
+  }
+}
