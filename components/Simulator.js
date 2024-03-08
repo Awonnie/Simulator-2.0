@@ -614,7 +614,7 @@ export default function Simulator() {
   const startAnimation = async () => {
     isAnimating.current = true;
     startTimer();
-    console.log(path_duration);
+    console.log("path_duration".path_duration);
     for (let i = 0; i < path_duration.length; i++) {
       if (!isAnimating.current) {
         setPage(0);
