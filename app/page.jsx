@@ -283,7 +283,7 @@ export default function Home() {
     // Set computing to true, act like a lock
     setIsComputing(true);
     // Call the query function from the API
-    QueryAPI.query(obstacles, robotX, robotY, robotDir, ({ data }, err) => {
+    QueryAPI.pathQuery(obstacles, robotX, robotY, robotDir, ({ data }, err) => {
       if (data) {
         // If the data is valid, set the path
         setPath(data.path);
@@ -657,164 +657,166 @@ export default function Home() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center p-6 bg-gray-50">
-      <div className="bg-white rounded-xl shadow-xl mb-8 p-4 w-full max-w-4xl">
-        <div className="card-body items-center text-center p-4">
-          <h2 className="text-2xl font-bold purple-gradient text-transparent bg-clip-text">
-            MDP AY23/24 Group 7 Algorithm Simulator
-          </h2>
-          <h2 className="text-xl font-semibold purple-gradient text-transparent bg-clip-text">
-            Robot Position
-          </h2>
-          <div className="form-control mt-4">
-            <label className="input-group input-group-horizontal">
-              <span className="purple-gradient text-white p-2 rounded-l">
-                X
-              </span>
-              <input
-                onChange={onChangeRobotX}
-                type="number"
-                placeholder="1"
-                min="1"
-                max="18"
-                className="input input-bordered text-purple-900"
-              />
-              <span className="purple-gradient text-white p-2">Y</span>
-              <input
-                onChange={onChangeRobotY}
-                type="number"
-                placeholder="1"
-                min="1"
-                max="18"
-                className="input input-bordered text-purple-900"
-              />
-              <span className="purple-gradient text-white p-2">D</span>
-              <select
-                onChange={onRobotDirectionInputChange}
-                value={robotDir}
-                className="select select-bordered text-purple-900"
-              >
-                <option value={ObDirection.NORTH}>Up</option>
-                <option value={ObDirection.SOUTH}>Down</option>
-                <option value={ObDirection.WEST}>Left</option>
-                <option value={ObDirection.EAST}>Right</option>
-              </select>
-              <button
-                className="purple-gradient text-white p-2 font-bold rounded-r"
-                onClick={onClickRobot}
-              >
-                Set
-              </button>
-            </label>
-          </div>
-        </div>
-        {/* Settings Buttons */}
-        <div className="py-4 flex justify-center gap-4">
-          <Button style={"gradient-btn-yellow"} onClick={onResetAll}>
-            Reset All
-          </Button>
-          <Button style={"gradient-btn-purple"} onClick={onReset}>
-            Reset Robot
-          </Button>
-          <Button style={"gradient-btn-cyan"} onClick={compute}>
-            Submit
-          </Button>
-        </div>
-
-        {path.length > 0 && (
-          <div className="flex-col justify-center space-y-4">
-            {/* Timer display */}
-            <div className="text-center mt-4">
-              <h2 className="font-semibold text-xl purple-gradient text-transparent bg-clip-text">
-                Timer:{" "}
-                <span className="purple-gradient text-transparent bg-clip-text">
-                  {formatTimer(timer)}
+    <div className="w-screen flex flex-col items-center justify-center p-6 bg-gray-50">
+      <div className="w-full lg:flex lg:justify-center">
+        <div className="border-2 border-purple-500 bg-white rounded-xl p-4 min-w-1/2 max-w-full">
+          <div className="card-body items-center text-center p-4">
+            <h2 className="text-2xl font-bold purple-gradient text-transparent bg-clip-text">
+              MDP AY23/24 Group 7 Algorithm Simulator
+            </h2>
+            <h2 className="text-xl font-semibold purple-gradient text-transparent bg-clip-text">
+              Robot Position
+            </h2>
+            <div className="form-control mt-4">
+              <label className="input-group input-group-horizontal">
+                <span className="purple-gradient text-white p-2 rounded-l">
+                  X
                 </span>
-              </h2>
-            </div>
-
-            {/* Animation controls */}
-            <div className="flex justify-center space-x-1">
-              <Button
-                style="outline-btn border-cyan-400 text-cyan-300 hover:bg-cyan-400"
-                onClick={startImmediate}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="32"
-                  height="32"
-                  fill="currentColor"
-                  class="bi bi-skip-forward-fill"
-                  viewBox="0 0 16 16"
+                <input
+                  onChange={onChangeRobotX}
+                  type="number"
+                  placeholder="1"
+                  min="1"
+                  max="18"
+                  className="input input-bordered text-purple-900"
+                />
+                <span className="purple-gradient text-white p-2">Y</span>
+                <input
+                  onChange={onChangeRobotY}
+                  type="number"
+                  placeholder="1"
+                  min="1"
+                  max="18"
+                  className="input input-bordered text-purple-900"
+                />
+                <span className="purple-gradient text-white p-2">D</span>
+                <select
+                  onChange={onRobotDirectionInputChange}
+                  value={robotDir}
+                  className="select select-bordered text-purple-900"
                 >
-                  {" "}
-                  <path d="M15.5 3.5a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V8.753l-6.267 3.636c-.54.313-1.233-.066-1.233-.697v-2.94l-6.267 3.636C.693 12.703 0 12.324 0 11.693V4.308c0-.63.693-1.01 1.233-.696L7.5 7.248v-2.94c0-.63.693-1.01 1.233-.696L15 7.248V4a.5.5 0 0 1 .5-.5z" />{" "}
-                </svg>
-              </Button>
-
-              <Button style="gradient-btn-cyan" onClick={startAnimation}>
-                Start Animation
-              </Button>
-
-              <Button
-                style="outline-btn border-red-500 text-red-500 hover:bg-red-500"
-                onClick={clearAnimation}
-              >
-                <svg
-                  width="32"
-                  height="32"
-                  viewBox="0 0 32 32"
-                  xmlns="http://www.w3.org/2000/svg"
+                  <option value={ObDirection.NORTH}>Up</option>
+                  <option value={ObDirection.SOUTH}>Down</option>
+                  <option value={ObDirection.WEST}>Left</option>
+                  <option value={ObDirection.EAST}>Right</option>
+                </select>
+                <button
+                  className="purple-gradient text-white p-2 font-bold rounded-r"
+                  onClick={onClickRobot}
                 >
-                  <line
-                    x1="0"
-                    y1="32"
-                    x2="32"
-                    y2="0"
-                    stroke-width="2"
-                    stroke="currentColor"
-                  />
-                  <line
-                    x1="0"
-                    y1="0"
-                    x2="32"
-                    y2="32"
-                    stroke-width="2"
-                    stroke="currentColor"
-                  />
-                </svg>
-              </Button>
-            </div>
-
-            <div className="flex justify-center space-x-1">
-              <Button
-                style={
-                  leaveTrace
-                    ? "base-btn bg-green-400"
-                    : "outline-btn border-green-400 text-green-400 hover:bg-green-400"
-                }
-                onClick={() => setLeaveTrace(!leaveTrace)}
-              >
-                {leaveTrace ? "Leave Trace: ON" : "Leave Trace: OFF"}
-              </Button>
-
-              <Button style="outline-btn-red" onClick={clearTrace}>
-                Clear Trace
-              </Button>
+                  Set
+                </button>
+              </label>
             </div>
           </div>
-        )}
-      </div>
+          {/* Settings Buttons */}
+          <div className="py-4 flex justify-center gap-4">
+            <Button style={"gradient-btn-yellow"} onClick={onResetAll}>
+              Reset All
+            </Button>
+            <Button style={"gradient-btn-purple"} onClick={onReset}>
+              Reset Robot
+            </Button>
+            <Button style={"gradient-btn-cyan"} onClick={compute}>
+              Submit
+            </Button>
+          </div>
 
-      {/* Grid */}
-      <div className="flex justify-center w-full max-w-6xl my-4">
-        <div className="w-3/4 flex justify-center">
-          <table className="content-right border-collapse border border-purple-500 w-auto text-sm">
-            <tbody>
-              {renderGrid()}{" "}
-              {/* Ensure this function outputs rows and cells with appropriate styling */}
-            </tbody>
-          </table>
+          {path.length > 0 && (
+            <div className="flex-col justify-center space-y-4">
+              {/* Timer display */}
+              <div className="text-center mt-4">
+                <h2 className="font-semibold text-xl purple-gradient text-transparent bg-clip-text">
+                  Timer:{" "}
+                  <span className="purple-gradient text-transparent bg-clip-text">
+                    {formatTimer(timer)}
+                  </span>
+                </h2>
+              </div>
+
+              {/* Animation controls */}
+              <div className="flex justify-center space-x-1">
+                <Button
+                  style="outline-btn border-cyan-400 text-cyan-300 hover:bg-cyan-400"
+                  onClick={startImmediate}
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="32"
+                    height="32"
+                    fill="currentColor"
+                    class="bi bi-skip-forward-fill"
+                    viewBox="0 0 16 16"
+                  >
+                    {" "}
+                    <path d="M15.5 3.5a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V8.753l-6.267 3.636c-.54.313-1.233-.066-1.233-.697v-2.94l-6.267 3.636C.693 12.703 0 12.324 0 11.693V4.308c0-.63.693-1.01 1.233-.696L7.5 7.248v-2.94c0-.63.693-1.01 1.233-.696L15 7.248V4a.5.5 0 0 1 .5-.5z" />{" "}
+                  </svg>
+                </Button>
+
+                <Button style="gradient-btn-cyan" onClick={startAnimation}>
+                  Start Animation
+                </Button>
+
+                <Button
+                  style="outline-btn border-red-500 text-red-500 hover:bg-red-500"
+                  onClick={clearAnimation}
+                >
+                  <svg
+                    width="32"
+                    height="32"
+                    viewBox="0 0 32 32"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <line
+                      x1="0"
+                      y1="32"
+                      x2="32"
+                      y2="0"
+                      stroke-width="2"
+                      stroke="currentColor"
+                    />
+                    <line
+                      x1="0"
+                      y1="0"
+                      x2="32"
+                      y2="32"
+                      stroke-width="2"
+                      stroke="currentColor"
+                    />
+                  </svg>
+                </Button>
+              </div>
+
+              <div className="flex justify-center space-x-1">
+                <Button
+                  style={
+                    leaveTrace
+                      ? "base-btn bg-green-400"
+                      : "outline-btn border-green-400 text-green-400 hover:bg-green-400"
+                  }
+                  onClick={() => setLeaveTrace(!leaveTrace)}
+                >
+                  {leaveTrace ? "Leave Trace: ON" : "Leave Trace: OFF"}
+                </Button>
+
+                <Button style="outline-btn-red" onClick={clearTrace}>
+                  Clear Trace
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Grid */}
+        <div className="flex justify-center min-w-1/2 w-full max-w-6xl my-4">
+          <div className="w-3/4 flex justify-center">
+            <table className="content-right border-collapse border border-purple-500 w-auto text-sm">
+              <tbody>
+                {renderGrid()}{" "}
+                {/* Ensure this function outputs rows and cells with appropriate styling */}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 

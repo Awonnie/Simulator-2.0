@@ -1,4 +1,5 @@
 import React from "react";
+import Button from "./components/Button";
 
 const NavBarDrawer = () => {
   return (
@@ -33,6 +34,14 @@ const NavBarDrawer = () => {
             <span className="font-bold text-xl purple-gradient text-transparent bg-clip-text">
               MDP Group 7 Simulator
             </span>
+          </div>
+          <div className="navbar-end flex space-x-3">
+            <Button style="base-btn rounded-full hover:bg-green-400">
+              /image
+            </Button>
+            <Button style="base-btn rounded-full hover:bg-green-400">
+              /stitch
+            </Button>
           </div>
         </div>
       </div>
