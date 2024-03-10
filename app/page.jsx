@@ -283,21 +283,18 @@ export default function Home() {
     // Set computing to true, act like a lock
     setIsComputing(true);
     // Call the query function from the API
-    QueryAPI.query(obstacles, robotX, robotY, robotDir, (data, err) => {
+    QueryAPI.query(obstacles, robotX, robotY, robotDir, ({ data }, err) => {
       if (data) {
         // If the data is valid, set the path
-        setPath(data.data.path);
-
-        // Path duration contains a list of the duration of each step
-        setPathDuration(data.data.path_execution_time);
+        setPath(data.path);
 
         // Total Duration of the entire path
-        setDuration(data.data.duration);
-        setDistance(data.data.distance); // Update this line to set the distance
+        setDuration(data.duration);
+        setDistance(data.distance); // Update this line to set the distance
 
         // Set the commands
         const commands = [];
-        for (let x of data.data.commands) {
+        for (let x of data.commands) {
           // If the command is a snapshot, skip it
           if (x.startsWith("SNAP")) {
             continue;
@@ -569,18 +566,19 @@ export default function Home() {
   const startAnimation = async () => {
     isAnimating.current = true;
     startTimer();
-    for (let i = 0; i < path_duration.length; i++) {
+    for (let i = 0; i < path.length; i++) {
       if (!isAnimating.current) {
         setPage(0);
         break;
       }
-      await sleep(path_duration[i]);
+      await sleep(0.5);
       setPage(i);
       if (traceEnabled) {
         updatePathHistory(path[i]);
         setTraceEnabled(false);
       }
-      if (i + 1 == +path.length) {
+      if (i + 1 == path.length) {
+        isAnimating.current = false;
         stopTimer();
       }
     }
@@ -618,7 +616,6 @@ export default function Home() {
   const [commands, setCommands] = useState([]);
   const [distance, setDistance] = useState(0);
   const [page, setPage] = useState(0);
-  const [path_duration, setPathDuration] = useState([]);
   const [duration, setDuration] = useState(0);
   const [configName, setConfigName] = useState("");
   const [configurations, setConfigurations] = useState(null);
