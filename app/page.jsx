@@ -630,15 +630,18 @@ export default function Home() {
   const haveConfig = useRef(false);
 
   useEffect(() => {
+    haveConfig.current = false;
+  }, []);
+
+  useEffect(() => {
     if (page >= path.length) return;
     setRobotState(path[page]);
     setnewPath(interpolatePath(path));
   }, [page, path]);
 
   useEffect(() => {
-    if (haveConfig.current) {
-      localStorage.setItem("Configurations", JSON.stringify(configurations));
-    }
+    if (haveConfig.current)
+      localStorage.setItem("Obstacle Preset", JSON.stringify(configurations));
   }, [obstacles, configurations]);
 
   const [robotState, setRobotState] = useState({

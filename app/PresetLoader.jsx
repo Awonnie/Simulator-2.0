@@ -11,7 +11,7 @@ export default function PresetLoader({
   const [counter, setCounter] = useState(0);
 
   useEffect(() => {
-    let configList = JSON.parse(localStorage.getItem("Maze Presets"));
+    let configList = JSON.parse(localStorage.getItem("Obstacle Presets"));
     setConfigs(configList);
     haveConfig.current = true;
   }, []);
