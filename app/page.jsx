@@ -475,7 +475,7 @@ export default function Home() {
           cells.push(
             <td
               className={`border w-5 h-5 md:w-8 md:h-8 transition ${
-                robotCells.s != -1 ? "bg-red-500" : "bg-blue-500"
+                foundTraceCell.s != -1 ? "bg-red-500" : "bg-blue-500"
               }`} // Example style for path history cells
             />
           );
