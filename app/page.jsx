@@ -474,7 +474,9 @@ export default function Home() {
         } else if (foundTraceCell && leaveTrace) {
           cells.push(
             <td
-              className="border w-5 h-5 md:w-8 md:h-8 bg-blue-500 transition" // Example style for path history cells
+              className={`border w-5 h-5 md:w-8 md:h-8 transition ${
+                robotCells.s != -1 ? "bg-red-500" : "bg-blue-500"
+              }`} // Example style for path history cells
             />
           );
         } else {
@@ -641,7 +643,7 @@ export default function Home() {
 
   useEffect(() => {
     if (haveConfig.current)
-      localStorage.setItem("Obstacle Preset", JSON.stringify(configurations));
+      localStorage.setItem("Obstacle Presets", JSON.stringify(configurations));
   }, [obstacles, configurations]);
 
   const [robotState, setRobotState] = useState({
