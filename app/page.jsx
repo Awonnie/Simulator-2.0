@@ -186,10 +186,8 @@ export default function Home() {
     let newConfigs = { ...configurations };
     let itExists = false;
 
-    //If config is empty
-    if (!haveConfig.current) {
+    if (newConfigs !== null) {
       newConfigs[configName] = obstacles;
-      haveConfig.current = true;
       setConfigurations(newConfigs);
       return;
     }
@@ -629,10 +627,12 @@ export default function Home() {
   const [timerRunning, setTimerRunning] = useState(false);
   const [timerInterval, setTimerInterval] = useState(null);
   const isAnimating = useRef(false);
-  const haveConfig = useRef(false);
 
   useEffect(() => {
-    haveConfig.current = false;
+    let configList = JSON.parse(localStorage.getItem("Obstacle Presets"));
+    if (configList !== null) {
+      setConfigurations(configList);
+    }
   }, []);
 
   useEffect(() => {
@@ -642,8 +642,9 @@ export default function Home() {
   }, [page, path]);
 
   useEffect(() => {
-    if (haveConfig.current)
+    if (configurations !== null) {
       localStorage.setItem("Obstacle Presets", JSON.stringify(configurations));
+    }
   }, [obstacles, configurations]);
 
   const [robotState, setRobotState] = useState({
@@ -913,10 +914,9 @@ export default function Home() {
       {/* Configurations Loader */}
       <PresetLoader
         setConfigName={setConfigName}
-        setObs={setObstacles}
-        haveConfig={haveConfig}
-        configs={configurations}
-        setConfigs={setConfigurations}
+        setObstacles={setObstacles}
+        configurations={configurations}
+        setConfigurations={setConfigurations}
       />
     </div>
   );
