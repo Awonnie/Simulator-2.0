@@ -1,20 +1,11 @@
-import dynamic from "next/dynamic";
-import { useEffect, useRef, useState } from "react";
-import QueryAPI from "./QueryAPI";
+"use client";
 
-const Configurations = dynamic(() => import("./Configurations"), {
-  ssr: false,
-});
+import { useEffect, useRef, useState } from "react";
+import PresetLoader from "./PresetLoader";
+import { QueryAPI } from "../helpers";
+import Button from "./components/Button";
 
 const Direction = {
-  NORTH: 0,
-  EAST: 2,
-  SOUTH: 4,
-  WEST: 6,
-  SKIP: 8,
-};
-
-const ObDirection = {
   NORTH: 0,
   EAST: 2,
   SOUTH: 4,
@@ -30,6 +21,37 @@ const DirectionToString = {
   8: "None",
 };
 
+const hashString = (str) => {
+  let hash = 0;
+  if (str.length === 0) {
+    return hash;
+  }
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = (hash << 5) - hash + char;
+    hash = hash & hash; // Convert to 32-bit integer
+  }
+  return hash;
+};
+// Function to format the timer value into HH:mm:ss format
+const formatTimer = (seconds) => {
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const remainingSeconds = seconds % 60;
+  return `${padZero(hours)}:${padZero(minutes)}:${padZero(remainingSeconds)}`;
+};
+const onDelete = (e) => {
+  e.preventDefault();
+  e.target.classList.remove("text-red-500");
+  e.target.classList.add("text-white", "bg-red-500", "scale-125");
+};
+
+const offDelete = (e) => {
+  e.target.classList.remove("text-white", "bg-red-500", "scale-125");
+  e.target.classList.add("text-red-500");
+};
+// Function to pad a number with leading zeros if it's less than 10
+const padZero = (num) => (num < 10 ? `0${num}` : num);
 const transformCoord = (x, y) => {
   // Change the coordinate system from (0, 0) at top left to (0, 0) at bottom left
   return { x: 19 - y, y: x };
@@ -39,64 +61,40 @@ function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
-function interpolatePath(path) {
-  let interpolatedPath = [];
+export default function Home() {
+  function interpolatePath(path) {
+    let interpolatedPath = [];
 
-  for (let i = 0; i < path.length - 1; i++) {
-    const start = path[i];
-    const end = path[i + 1];
-    interpolatedPath.push(start);
+    for (let i = 0; i < path.length - 1; i++) {
+      const start = path[i];
+      const end = path[i + 1];
+      interpolatedPath.push(start);
 
-    // Calculate differences
-    const dx = end.x - start.x;
-    const dy = end.y - start.y;
-    const maxSteps = Math.max(Math.abs(dx), Math.abs(dy));
+      // Calculate differences
+      const dx = end.x - start.x;
+      const dy = end.y - start.y;
+      const maxSteps = Math.max(Math.abs(dx), Math.abs(dy));
 
-    // Calculate step increments
-    const stepX = dx / maxSteps;
-    const stepY = dy / maxSteps;
+      // Calculate step increments
+      const stepX = dx / maxSteps;
+      const stepY = dy / maxSteps;
 
-    // Generate intermediate steps
-    for (let step = 1; step <= maxSteps; step++) {
-      interpolatedPath.push({
-        d: start.d, // Assume direction doesn't change, adjust as necessary
-        s: start.s,
-        x: start.x + stepX * step,
-        y: start.y + stepY * step,
-      });
+      // Generate intermediate steps
+      for (let step = 1; step <= maxSteps; step++) {
+        interpolatedPath.push({
+          d: start.d, // Assume direction doesn't change, adjust as necessary
+          s: start.s,
+          x: start.x + stepX * step,
+          y: start.y + stepY * step,
+        });
+      }
     }
+
+    // Ensure the final position is included
+    interpolatedPath.push(path[path.length - 1]);
+
+    return interpolatedPath;
   }
-
-  // Ensure the final position is included
-  interpolatedPath.push(path[path.length - 1]);
-
-  return interpolatedPath;
-}
-
-export default function Simulator() {
-  const [robotState, setRobotState] = useState({
-    x: 1,
-    y: 1,
-    d: Direction.NORTH,
-    s: -1,
-  });
-  const [robotX, setRobotX] = useState(1);
-  const [robotY, setRobotY] = useState(1);
-  const [robotDir, setRobotDir] = useState(0);
-  const [obstacles, setObstacles] = useState([]);
-  const [isComputing, setIsComputing] = useState(false);
-  const [path, setPath] = useState([]);
-  const [commands, setCommands] = useState([]);
-  const [distance, setDistance] = useState(0); // Assuming distance is a numeric value
-  const [page, setPage] = useState(0);
-  const [path_duration, setPathDuration] = useState([]);
-  const [duration, setDuration] = useState(0);
-  const [configName, setConfigName] = useState("");
-  const [configurations, setConfigurations] = useState(null);
-  const isAnimating = useRef(false);
-  const [leaveTrace, setLeaveTrace] = useState(false); // Default to not leaving a trace
-  const [pathHistory, setPathHistory] = useState([]);
-  const [traceEnabled, setTraceEnabled] = useState(true);
 
   const generateNewID = () => {
     while (true) {
@@ -113,7 +111,6 @@ export default function Simulator() {
       }
     }
   };
-  const haveConfig = useRef(false);
 
   const generateRobotCells = () => {
     const robotCells = [];
@@ -189,11 +186,8 @@ export default function Simulator() {
     let newConfigs = { ...configurations };
     let itExists = false;
 
-    //If config is empty
-    if (!haveConfig.current) {
-      console.log("For some reason, have config is still false");
+    if (newConfigs !== null) {
       newConfigs[configName] = obstacles;
-      haveConfig.current = true;
       setConfigurations(newConfigs);
       return;
     }
@@ -217,12 +211,10 @@ export default function Simulator() {
 
       if (itExists) {
         if (name === configName) {
-          console.log("Name exists...");
           return;
         } //If it exists and the name is the same, you dont need to save, can just return
 
         //If it exists and the name is different, you need to update the name
-        console.log("Updating name...");
         delete newConfigs[name];
         break;
       }
@@ -230,19 +222,6 @@ export default function Simulator() {
 
     newConfigs[configName] = obstacles;
     setConfigurations(newConfigs);
-  };
-
-  const hashString = (str) => {
-    let hash = 0;
-    if (str.length === 0) {
-      return hash;
-    }
-    for (let i = 0; i < str.length; i++) {
-      const char = str.charCodeAt(i);
-      hash = (hash << 5) - hash + char;
-      hash = hash & hash; // Convert to 32-bit integer
-    }
-    return hash;
   };
 
   const onClickObstacle = (obInput) => {
@@ -302,26 +281,18 @@ export default function Simulator() {
     // Set computing to true, act like a lock
     setIsComputing(true);
     // Call the query function from the API
-    QueryAPI.query(obstacles, robotX, robotY, robotDir, (data, err) => {
+    QueryAPI.pathQuery(obstacles, robotX, robotY, robotDir, ({ data }, err) => {
       if (data) {
         // If the data is valid, set the path
-        setPath(data.data.path);
-
-        console.log("Path:", path);
-        console.log("New path:", newpath);
-
-        // Path duration contains a list of the duration of each step
-        setPathDuration(data.data.path_time);
+        setPath(data.path);
 
         // Total Duration of the entire path
-        setDuration(data.data.duration);
-        setDistance(data.data.distance); // Update this line to set the distance
+        setDuration(data.duration);
+        setDistance(data.distance); // Update this line to set the distance
 
-        console.log("Distance:", distance);
-        console.log("Duration:", duration);
         // Set the commands
         const commands = [];
-        for (let x of data.data.commands) {
+        for (let x of data.commands) {
           // If the command is a snapshot, skip it
           if (x.startsWith("SNAP")) {
             continue;
@@ -359,7 +330,6 @@ export default function Simulator() {
   };
 
   const dragStart = (e, ob) => {
-    console.log(ob);
     e.dataTransfer.setData("draggedOb", JSON.stringify(ob));
   };
 
@@ -381,7 +351,6 @@ export default function Simulator() {
     };
     let newObstacles = obstacles.filter((ob) => ob.id !== obToDelete.id);
     newObstacles.push(obToAdd);
-    console.log("Updated obstacles?:", newObstacles);
     setObstacles(newObstacles);
   };
 
@@ -503,7 +472,9 @@ export default function Simulator() {
         } else if (foundTraceCell && leaveTrace) {
           cells.push(
             <td
-              className="border w-5 h-5 md:w-8 md:h-8 bg-blue-500 transition" // Example style for path history cells
+              className={`border w-5 h-5 md:w-8 md:h-8 transition ${
+                foundTraceCell.s != -1 ? "bg-red-500" : "bg-blue-500"
+              }`} // Example style for path history cells
             />
           );
         } else {
@@ -541,14 +512,6 @@ export default function Simulator() {
     return rows;
   };
 
-  const [newpath, setnewPath] = useState([]);
-
-  // New state variable for the timer
-  const [timer, setTimer] = useState(0);
-  const [timerRunning, setTimerRunning] = useState(false);
-  // Define timerInterval as a state variable
-  const [timerInterval, setTimerInterval] = useState(null);
-
   // Function to start the timer
   const startTimer = () => {
     if (!timerRunning) {
@@ -584,17 +547,6 @@ export default function Simulator() {
     setTimerRunning(false);
   };
 
-  // Function to format the timer value into HH:mm:ss format
-  const formatTimer = (seconds) => {
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    const remainingSeconds = seconds % 60;
-    return `${padZero(hours)}:${padZero(minutes)}:${padZero(remainingSeconds)}`;
-  };
-
-  // Function to pad a number with leading zeros if it's less than 10
-  const padZero = (num) => (num < 10 ? `0${num}` : num);
-
   async function sleep(seconds) {
     return new Promise((resolve) => setTimeout(resolve, seconds * 1000));
   }
@@ -614,19 +566,19 @@ export default function Simulator() {
   const startAnimation = async () => {
     isAnimating.current = true;
     startTimer();
-    console.log(path_duration);
-    for (let i = 0; i < path_duration.length; i++) {
+    for (let i = 0; i < path.length; i++) {
       if (!isAnimating.current) {
         setPage(0);
         break;
       }
-      await sleep(path_duration[i]);
+      await sleep(0.5);
       setPage(i);
       if (traceEnabled) {
         updatePathHistory(path[i]);
         setTraceEnabled(false);
       }
-      if (i + 1 == +path.length) {
+      if (i + 1 == path.length) {
+        isAnimating.current = false;
         stopTimer();
       }
     }
@@ -655,16 +607,33 @@ export default function Simulator() {
     setTraceEnabled(true); // Re-enable tracing for new paths
   };
 
-  const onDelete = (e) => {
-    e.preventDefault();
-    e.target.classList.remove("text-red-500");
-    e.target.classList.add("text-white", "bg-red-500", "scale-125");
-  };
+  const [robotX, setRobotX] = useState(1);
+  const [robotY, setRobotY] = useState(1);
+  const [robotDir, setRobotDir] = useState(0);
+  const [obstacles, setObstacles] = useState([]);
+  const [isComputing, setIsComputing] = useState(false);
+  const [path, setPath] = useState([]);
+  const [commands, setCommands] = useState([]);
+  const [distance, setDistance] = useState(0);
+  const [page, setPage] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [configName, setConfigName] = useState("");
+  const [configurations, setConfigurations] = useState(null);
+  const [leaveTrace, setLeaveTrace] = useState(false);
+  const [pathHistory, setPathHistory] = useState([]);
+  const [traceEnabled, setTraceEnabled] = useState(true);
+  const [newpath, setnewPath] = useState([]);
+  const [timer, setTimer] = useState(0);
+  const [timerRunning, setTimerRunning] = useState(false);
+  const [timerInterval, setTimerInterval] = useState(null);
+  const isAnimating = useRef(false);
 
-  const offDelete = (e) => {
-    e.target.classList.remove("text-white", "bg-red-500", "scale-125");
-    e.target.classList.add("text-red-500");
-  };
+  useEffect(() => {
+    let configList = JSON.parse(localStorage.getItem("Obstacle Presets"));
+    if (configList !== null) {
+      setConfigurations(configList);
+    }
+  }, []);
 
   useEffect(() => {
     if (page >= path.length) return;
@@ -673,159 +642,187 @@ export default function Simulator() {
   }, [page, path]);
 
   useEffect(() => {
-    if (haveConfig.current) {
-      localStorage.setItem("Configurations", JSON.stringify(configurations));
-    }
-    if (obstacles.length > 0) {
-      console.log("Obstacles:", obstacles);
+    if (configurations !== null) {
+      localStorage.setItem("Obstacle Presets", JSON.stringify(configurations));
     }
   }, [obstacles, configurations]);
 
+  const [robotState, setRobotState] = useState({
+    x: 1,
+    y: 1,
+    d: Direction.NORTH,
+    s: -1,
+  });
+
+  const ObDirection = {
+    NORTH: 0,
+    EAST: 2,
+    SOUTH: 4,
+    WEST: 6,
+    SKIP: 8,
+  };
+
   return (
-    <div className="flex flex-col items-center justify-center p-6 bg-gray-50">
-      {/* Robot Position */}
-      <div className="bg-white rounded-xl shadow-xl mb-8 p-4 w-full max-w-4xl">
-        <div className="card-body items-center text-center p-4">
-          <h2 className="text-2xl font-bold bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 text-transparent bg-clip-text">
-            MDP AY23/24 Group 7 Algorithm Simulator
-          </h2>
-          <h2 className="text-xl font-semibold bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 text-transparent bg-clip-text">
-            Robot Position
-          </h2>
-          <div className="form-control mt-4">
-            <label className="input-group input-group-horizontal">
-              <span className="bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 text-white p-2 rounded-l">
-                X
-              </span>
-              <input
-                onChange={onChangeRobotX}
-                type="number"
-                placeholder="1"
-                min="1"
-                max="18"
-                className="input input-bordered text-purple-900"
-              />
-              <span className="bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 text-white p-2">
-                Y
-              </span>
-              <input
-                onChange={onChangeRobotY}
-                type="number"
-                placeholder="1"
-                min="1"
-                max="18"
-                className="input input-bordered text-purple-900"
-              />
-              <span className="bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 text-white p-2">
-                D
-              </span>
-              <select
-                onChange={onRobotDirectionInputChange}
-                value={robotDir}
-                className="select select-bordered text-purple-900"
-              >
-                <option value={ObDirection.NORTH}>Up</option>
-                <option value={ObDirection.SOUTH}>Down</option>
-                <option value={ObDirection.WEST}>Left</option>
-                <option value={ObDirection.EAST}>Right</option>
-              </select>
-              <button
-                className="bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 text-white p-2 font-bold rounded-r"
-                onClick={onClickRobot}
-              >
-                Set
-              </button>
-            </label>
-          </div>
-        </div>
-        {/* Settings Buttons */}
-        <div className="py-4 flex justify-center gap-4">
-          <button
-            className="border-2 border-purple-500 bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 text-transparent bg-clip-text font-bold py-2 px-4 rounded shadow-lg hover:text-white hover:bg-clip-border hover:border-white hover:rounded-md hover:scale-105 active:scale-90 transition duration-150 ease-in-out"
-            onClick={onResetAll}
-          >
-            Reset All
-          </button>
-
-          <button
-            className="border-2 border-yellow-400 bg-gradient-to-tr from-orange-400 via-yellow-400 to-pink-400 text-transparent font-bold py-2 px-4 rounded bg-clip-text shadow-lg hover:scale-105 hover:bg-clip-border hover:text-white hover:rounded-md hover:border-none active:scale-90 transition duration-150 ease-in-out"
-            onClick={onReset}
-          >
-            Reset Robot
-          </button>
-
-          <button
-            className="border-2 border-cyan-400 bg-gradient-to-tr from-green-400 via-cyan-400 to-orange-200 text-transparent bg-clip-text font-bold py-2 px-4 rounded shadow-lg hover:scale-105 active:scale-90 hover:bg-clip-border hover:border-none hover:text-white transition duration-150 ease-in-out"
-            onClick={compute}
-          >
-            Submit
-          </button>
-        </div>
-
-        {path.length > 0 && (
-          <div>
-            {/* Timer display */}
-            <div className="text-center mt-4">
-              <h2 className="font-semibold text-xl text-purple-700">
-                Timer:{" "}
-                <span className="text-purple-500">{formatTimer(timer)}</span>
-              </h2>
-            </div>
-
-            {/* Animation controls */}
-            <div className="flex justify-center gap-4 py-4">
-              <button
-                className="bg-gradient-to-tr from-blue-500 to-blue-600 text-white font-bold py-2 px-4 rounded shadow-lg hover:from-blue-600 hover:to-blue-700 hover:scale-105 active:scale-90 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
-                onClick={startImmediate}
-              >
-                Immediate
-              </button>
-
-              <button
-                className="bg-gradient-to-tr from-blue-500 to-blue-600 text-white font-bold py-2 px-4 rounded shadow-lg hover:from-blue-600 hover:to-blue-700 hover:scale-105 active:scale-90 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
-                onClick={startAnimation}
-              >
-                Start Animation
-              </button>
-
-              <button
-                className="bg-gradient-to-tr from-red-500 to-red-600 text-white font-bold py-2 px-4 rounded shadow-lg hover:from-red-600 hover:to-red-700 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 active:scale-90 transition duration-150 ease-in-out"
-                onClick={clearAnimation}
-              >
-                Clear
-              </button>
-
-              <button
-                className={`${
-                  leaveTrace
-                    ? "bg-green-500 hover:bg-green-600 focus:ring-green-500"
-                    : "bg-red-500 hover:bg-red-600 focus:ring-red-500"
-                } text-white font-bold py-2 px-4 rounded shadow-lg hover:scale-105 transition duration-150 ease-in-out focus:outline-none focus:ring-2 active:scale-90`}
-                onClick={() => setLeaveTrace(!leaveTrace)}
-              >
-                {leaveTrace ? "Leave Trace: ON" : "Leave Trace: OFF"}
-              </button>
-
-              <button
-                className="bg-gradient-to-tr from-red-500 to-red-600 text-white font-bold py-2 px-4 rounded shadow-lg hover:from-red-600 hover:to-red-700 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 active:scale-90 transition duration-150 ease-in-out"
-                onClick={clearTrace}
-              >
-                Clear Trace
-              </button>
+    <div className="w-screen flex flex-col items-center justify-center p-6 bg-gray-50">
+      <div className="w-full lg:flex lg:justify-center">
+        <div className="border-2 border-purple-500 bg-white rounded-xl p-4 min-w-1/2 max-w-full">
+          <div className="card-body items-center text-center p-4">
+            <h2 className="text-2xl font-bold purple-gradient text-transparent bg-clip-text">
+              MDP AY23/24 Group 7 Algorithm Simulator
+            </h2>
+            <h2 className="text-xl font-semibold purple-gradient text-transparent bg-clip-text">
+              Robot Position
+            </h2>
+            <div className="form-control mt-4">
+              <label className="input-group input-group-horizontal">
+                <span className="purple-gradient text-white p-2 rounded-l">
+                  X
+                </span>
+                <input
+                  onChange={onChangeRobotX}
+                  type="number"
+                  placeholder="1"
+                  min="1"
+                  max="18"
+                  className="input input-bordered text-purple-900"
+                />
+                <span className="purple-gradient text-white p-2">Y</span>
+                <input
+                  onChange={onChangeRobotY}
+                  type="number"
+                  placeholder="1"
+                  min="1"
+                  max="18"
+                  className="input input-bordered text-purple-900"
+                />
+                <span className="purple-gradient text-white p-2">D</span>
+                <select
+                  onChange={onRobotDirectionInputChange}
+                  value={robotDir}
+                  className="select select-bordered text-purple-900"
+                >
+                  <option value={ObDirection.NORTH}>Up</option>
+                  <option value={ObDirection.SOUTH}>Down</option>
+                  <option value={ObDirection.WEST}>Left</option>
+                  <option value={ObDirection.EAST}>Right</option>
+                </select>
+                <button
+                  className="purple-gradient text-white p-2 font-bold rounded-r"
+                  onClick={onClickRobot}
+                >
+                  Set
+                </button>
+              </label>
             </div>
           </div>
-        )}
-      </div>
+          {/* Settings Buttons */}
+          <div className="py-4 flex justify-center gap-4">
+            <Button style={"gradient-btn-yellow"} onClick={onResetAll}>
+              Reset All
+            </Button>
+            <Button style={"gradient-btn-purple"} onClick={onReset}>
+              Reset Robot
+            </Button>
+            <Button style={"gradient-btn-cyan"} onClick={compute}>
+              Submit
+            </Button>
+          </div>
 
-      {/* Grid */}
-      <div className="flex justify-center w-full max-w-6xl my-4">
-        <div className="w-3/4 flex justify-center">
-          <table className="content-right border-collapse border border-purple-500 w-auto text-sm">
-            <tbody>
-              {renderGrid()}{" "}
-              {/* Ensure this function outputs rows and cells with appropriate styling */}
-            </tbody>
-          </table>
+          {path.length > 0 && (
+            <div className="flex-col justify-center space-y-4">
+              {/* Timer display */}
+              <div className="text-center mt-4">
+                <h2 className="font-semibold text-xl purple-gradient text-transparent bg-clip-text">
+                  Timer:{" "}
+                  <span className="purple-gradient text-transparent bg-clip-text">
+                    {formatTimer(timer)}
+                  </span>
+                </h2>
+              </div>
+
+              {/* Animation controls */}
+              <div className="flex justify-center space-x-1">
+                <Button
+                  style="outline-btn border-cyan-400 text-cyan-300 hover:bg-cyan-400"
+                  onClick={startImmediate}
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="32"
+                    height="32"
+                    fill="currentColor"
+                    class="bi bi-skip-forward-fill"
+                    viewBox="0 0 16 16"
+                  >
+                    {" "}
+                    <path d="M15.5 3.5a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V8.753l-6.267 3.636c-.54.313-1.233-.066-1.233-.697v-2.94l-6.267 3.636C.693 12.703 0 12.324 0 11.693V4.308c0-.63.693-1.01 1.233-.696L7.5 7.248v-2.94c0-.63.693-1.01 1.233-.696L15 7.248V4a.5.5 0 0 1 .5-.5z" />{" "}
+                  </svg>
+                </Button>
+
+                <Button style="gradient-btn-cyan" onClick={startAnimation}>
+                  Start Animation
+                </Button>
+
+                <Button
+                  style="outline-btn border-red-500 text-red-500 hover:bg-red-500"
+                  onClick={clearAnimation}
+                >
+                  <svg
+                    width="32"
+                    height="32"
+                    viewBox="0 0 32 32"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <line
+                      x1="0"
+                      y1="32"
+                      x2="32"
+                      y2="0"
+                      stroke-width="2"
+                      stroke="currentColor"
+                    />
+                    <line
+                      x1="0"
+                      y1="0"
+                      x2="32"
+                      y2="32"
+                      stroke-width="2"
+                      stroke="currentColor"
+                    />
+                  </svg>
+                </Button>
+              </div>
+
+              <div className="flex justify-center space-x-1">
+                <Button
+                  style={
+                    leaveTrace
+                      ? "base-btn bg-green-400"
+                      : "outline-btn border-green-400 text-green-400 hover:bg-green-400"
+                  }
+                  onClick={() => setLeaveTrace(!leaveTrace)}
+                >
+                  {leaveTrace ? "Leave Trace: ON" : "Leave Trace: OFF"}
+                </Button>
+
+                <Button style="outline-btn-red" onClick={clearTrace}>
+                  Clear Trace
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Grid */}
+        <div className="flex justify-center min-w-1/2 w-full max-w-6xl my-4">
+          <div className="w-3/4 flex justify-center">
+            <table className="content-right border-collapse border border-purple-500 w-auto text-sm">
+              <tbody>
+                {renderGrid()}{" "}
+                {/* Ensure this function outputs rows and cells with appropriate styling */}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
@@ -867,7 +864,7 @@ export default function Simulator() {
       {obstacles.length > 0 && (
         <div className="bg-white rounded-xl shadow-xl mb-8 p-4 w-full max-w-4xl">
           <div className="card-body items-center text-center p-4">
-            <h2 className="text-xl font-semibold bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 text-transparent bg-clip-text">
+            <h2 className="text-xl font-semibold purple-gradient text-transparent bg-clip-text">
               Current Obstacles
             </h2>
             <div className="grid grid-cols-5 gap-5 p-5">
@@ -894,43 +891,32 @@ export default function Simulator() {
               })}
             </div>
             <div className="container flex justify-evenly">
-              <div className="flex justify-between rounded-md bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 w-1/2">
-                <p className="font-bold">Config Name:</p>
+              <div className="w-1/2 h-100% purple-gradient rounded-md p-1">
                 <input
                   type="text"
-                  className="w-full rounded-md m-1 text-center text-gray-900 hover:shadow-inner focus:outline-none"
+                  className="w-full h-full rounded-md text-center text-gray-900 hover:shadow-inner focus:outline-none"
                   value={configName}
                   placeholder={configName}
                   onChange={(e) => setConfigName(e.target.value)}
                 />
               </div>
 
-              <button
-                className="bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 text-white font-bold py-2 px-4 rounded shadow-lg hover:scale-105 active:scale-90 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
-                onClick={saveConfig}
-              >
+              <Button style={"gradient-btn-purple"} onClick={saveConfig}>
                 Save Configuration
-              </button>
-              <button
-                className="border-4 border-red-500 rounded px-4 text-red-500 font-bold cursor-default transition duration-150 ease-in-out"
-                onDragOver={(e) => onDelete(e)}
-                onDragLeave={(e) => offDelete(e)}
-                onDrop={(e) => deleteObInfo(e)}
-              >
-                Delete
-              </button>
+              </Button>
+
+              <Button style={"outline-btn-red"}>Delete</Button>
             </div>
           </div>
         </div>
       )}
 
       {/* Configurations Loader */}
-      <Configurations
+      <PresetLoader
         setConfigName={setConfigName}
-        setObs={setObstacles}
-        haveConfig={haveConfig}
-        configs={configurations}
-        setConfigs={setConfigurations}
+        setObstacles={setObstacles}
+        configurations={configurations}
+        setConfigurations={setConfigurations}
       />
     </div>
   );
