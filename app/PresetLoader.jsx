@@ -9,31 +9,57 @@ export default function PresetLoader({
     setObstacles(ob);
     setConfigName(name);
   };
+  const deleteConfig = (name, ob) => {
+    setObstacles(ob);
+    setConfigName(name);
+  };
 
   return (
     <>
       {configurations && (
-        <div className="bg-white rounded-xl shadow-xl mb-8 p-4 w-full max-w-4xl">
-          <div className="card-body items-center text-center p-4">
-            <h2 className="mb-5 text-xl font-semibold bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-transparent bg-clip-text">
-              Obstacle Presets
-            </h2>
-            <div className="container flex-col">
+        <div className="flex justify-center max-h-96 w-full overflow-y-scroll bg-white rounded-xl border-2 border-purple-500 mb-8 p-4 no-scrollbar">
+          <table className="table">
+            {/* head */}
+            <thead>
+              <tr>
+                <th></th>
+                <th className="font-bold text-lg purple-gradient text-transparent bg-clip-text">
+                  Preset Name
+                </th>
+                <th className="font-bold text-lg purple-gradient text-transparent bg-clip-text">
+                  Number of Obstacles
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {/* row 1 */}
               {Object.entries(configurations).map(([key, value]) => (
-                <div key={key} className="container flex justify-evenly p-2">
-                  <div className="w-1/2 flex items-center border-b-2 border-gray-300">
-                    <p className="font-bold text-black text-center">{key}</p>
-                  </div>
-                  <Button
-                    style={"gradient-btn-purple"}
-                    onClick={() => loadConfig(key, value)}
-                  >
-                    Load
-                  </Button>
-                </div>
+                <tr>
+                  <th></th>
+                  <td className="font-semibold text-base purple-gradient text-transparent bg-clip-text">
+                    {key}
+                  </td>
+                  <td></td>
+                  <td>
+                    <Button
+                      style={"gradient-btn-purple"}
+                      onClick={() => loadConfig(key, value)}
+                    >
+                      Load
+                    </Button>
+                  </td>
+                  <td>
+                    <Button
+                      style={"outline-btn-red"}
+                      onClick={() => deleteConfig(key, value)}
+                    >
+                      Delete
+                    </Button>
+                  </td>
+                </tr>
               ))}
-            </div>
-          </div>
+            </tbody>
+          </table>
         </div>
       )}
     </>

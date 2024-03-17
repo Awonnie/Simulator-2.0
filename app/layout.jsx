@@ -16,7 +16,6 @@ export default function RootLayout({
     <html lang="en">
       <body className="no-scrollbar">
         <NavBarDrawer />
-        {children}
       </body>
     </html>
   );
