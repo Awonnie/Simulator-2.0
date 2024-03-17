@@ -289,7 +289,6 @@ export default function Home() {
         setPath(data.path);
 
         // Total Duration of the entire path
-        setDuration(data.duration);
         setDistance(data.distance); // Update this line to set the distance
 
         // Set the commands
@@ -297,14 +296,15 @@ export default function Home() {
         for (let x of data.commands) {
           // If the command is a snapshot, skip it
           if (x.startsWith("SNAP")) {
+            commands.push("SNAP");
             continue;
           }
           commands.push(x);
         }
         setCommands(commands);
+        // Set computing to false, release the lock
+        setIsComputing(false);
       }
-      // Set computing to false, release the lock
-      setIsComputing(false);
     });
   };
 
@@ -631,13 +631,11 @@ export default function Home() {
   const [robotY, setRobotY] = useState(1);
   const [robotDir, setRobotDir] = useState(0);
   const [obstacles, setObstacles] = useState([]);
-  const [isComputing, setIsComputing] = useState(false);
   const [path, setPath] = useState([]);
   const [commands, setCommands] = useState([]);
   const [commandIndex, setCommandIndex] = useState(0);
   const [distance, setDistance] = useState(0);
   const [page, setPage] = useState(0);
-  const [duration, setDuration] = useState(0);
   const [configName, setConfigName] = useState("");
   const [configurations, setConfigurations] = useState(null);
   const [leaveTrace, setLeaveTrace] = useState(false);
@@ -645,6 +643,7 @@ export default function Home() {
   const [timer, setTimer] = useState(0);
   const timerInterval = useRef();
   const isAnimating = useRef(false);
+  const [isComputing, setIsComputing] = useState(false);
   let timerRunning = false;
 
   useEffect(() => {
@@ -682,8 +681,8 @@ export default function Home() {
 
   return (
     <div className="w-screen flex flex-col items-center justify-center p-6 bg-gray-50">
-      <div className="w-full lg:flex lg:justify-center">
-        <div className="border-2 border-purple-500 bg-white rounded-xl p-4 min-w-1/2 max-w-full">
+      <div className="w-full lg:flex lg:justify-center my-10 lg:space-x-9">
+        <div className="border-2 border-purple-500 bg-white rounded-xl p-4 w-full lg:w-1/3">
           <div className="card-body items-center text-center p-4">
             <h2 className="text-2xl font-bold purple-gradient text-transparent bg-clip-text">
               Main Controls
@@ -694,7 +693,7 @@ export default function Home() {
             </h2>
             <div className="form-control mt-4">
               <label className="input-group input-group-horizontal">
-                <span className="purple-gradient text-white p-2 rounded-l">
+                <span className="purple-gradient text-white p-2 rounded-l input-sm">
                   X
                 </span>
                 <input
@@ -703,22 +702,26 @@ export default function Home() {
                   placeholder="1"
                   min="1"
                   max="18"
-                  className="input input-bordered text-purple-900"
+                  className="input input-bordered rounded-none input-sm text-purple-900"
                 />
-                <span className="purple-gradient text-white p-2">Y</span>
+                <span className="purple-gradient text-white p-2 input-sm">
+                  Y
+                </span>
                 <input
                   onChange={onChangeRobotY}
                   type="number"
                   placeholder="1"
                   min="1"
                   max="18"
-                  className="input input-bordered text-purple-900"
+                  className="input input-bordered rounded-none input-sm text-purple-900"
                 />
-                <span className="purple-gradient text-white p-2">D</span>
+                <span className="purple-gradient text-white p-2 input-sm">
+                  D
+                </span>
                 <select
                   onChange={onRobotDirectionInputChange}
                   value={robotDir}
-                  className="select select-bordered text-purple-900"
+                  className="select select-bordered select-sm rounded-none text-purple-900"
                 >
                   <option value={ObDirection.NORTH}>Up</option>
                   <option value={ObDirection.SOUTH}>Down</option>
@@ -742,9 +745,25 @@ export default function Home() {
             <Button style={"gradient-btn-purple"} onClick={onReset}>
               Reset Robot
             </Button>
-            <Button style={"gradient-btn-cyan"} onClick={compute}>
-              Submit
-            </Button>
+            {isComputing ? (
+              <Button style="outline-btn btn-disabled">
+                <p className="flex justify-center space-x-2">
+                  <span className="loading loading-spinner loading-md"></span>
+                  <span>Loading...</span>
+                </p>
+              </Button>
+            ) : (
+              <Button
+                style={
+                  obstacles.length > 0
+                    ? "gradient-btn-cyan"
+                    : "outline-btn btn-disabled"
+                }
+                onClick={compute}
+              >
+                Submit
+              </Button>
+            )}
           </div>
           <div className="divider"></div>
           {path.length > 0 && (
@@ -848,12 +867,28 @@ export default function Home() {
                   >
                     «
                   </Button>
-                  <Button style="join-item base-btn purple-gradient">
-                    {commands[commandIndex]}
-                  </Button>
-                  <Button style="join-item base-btn purple-gradient">
-                    <FaPlay />
-                  </Button>
+                  <div className="dropdown dropdown-top join-item">
+                    <div
+                      tabIndex={0}
+                      role="button"
+                      className="base-btn purple-gradient"
+                    >
+                      {commands[commandIndex]}
+                    </div>
+                    <ul
+                      tabIndex={0}
+                      className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52 block max-h-60 overflow-y-scroll"
+                    >
+                      {commands.map((_, index) => (
+                        <li
+                          key={index}
+                          className="font-semibold text-center py-1 purple-gradient text-transparent bg-clip-text"
+                        >
+                          {commands[index]}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                   <Button
                     style="join-item base-btn purple-gradient"
                     onClick={nextCommand}
@@ -867,8 +902,8 @@ export default function Home() {
         </div>
 
         {/* Grid */}
-        <div className="flex justify-center min-w-1/2 w-full max-w-6xl my-4">
-          <div className="w-3/4 flex justify-center">
+        <div className="flex justify-center w-1/2 h-full my-4">
+          <div className="w-full flex justify-center">
             <table className="content-right border-collapse border border-purple-500 w-auto text-sm">
               <tbody>
                 {renderGrid()}{" "}
