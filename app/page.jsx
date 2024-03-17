@@ -514,6 +514,7 @@ export default function Home() {
 
   // Function to start the timer
   const startTimer = () => {
+    isAnimating.current = true;
     if (!timerRunning) {
       timerRunning = true;
       setTimer((prevTimer) => prevTimer + 1);
@@ -530,6 +531,7 @@ export default function Home() {
 
   // Function to stop the timer
   const stopTimer = () => {
+    isAnimating.current = false;
     if (timerRunning) {
       // Clear the interval using the stored interval ID
       clearInterval(timerInterval.current);
@@ -552,47 +554,48 @@ export default function Home() {
   }
 
   const startImmediate = async () => {
-    for (let i = 0; i < newpath.length; i++) {
-      await sleep(0.02);
-      setRobotState(newpath[i]);
-      if (traceEnabled) {
-        updatePathHistory(path[i]);
-        setTraceEnabled(false);
-      }
+    if (isAnimating) {
+      stopAnimation();
     }
+
+    setLeaveTrace(true);
+    for (let i = 0; i < path.length; i++) {
+      await sleep(0.02);
+      updatePathHistory(path[i]);
+    }
+    setRobotState(path[path.length - 1]);
+    resetTimer();
   };
 
   // Function to start the animation
   const startAnimation = async () => {
-    isAnimating = true;
+    if (page >= path.length) return;
+
     startTimer();
-    for (let i = 0; i < path.length; i++) {
-      if (!isAnimating) {
-        setPage(0);
-        break;
-      }
-      await sleep(0.5);
+    for (let i = page; i < path.length; i++) {
+      if (!isAnimating.current) break;
+
+      await sleep(0.3);
       setPage(i);
-      if (traceEnabled) {
-        updatePathHistory(path[i]);
-        setTraceEnabled(false);
-      }
-      if (i + 1 == path.length) {
-        isAnimating = false;
-        stopTimer();
-      }
+      if (leaveTrace) updatePathHistory(path[i]);
     }
+    stopTimer();
+  };
+
+  const stopAnimation = () => {
+    isAnimating.current = false;
+    stopTimer();
   };
 
   // Function to clear the animation
   const clearAnimation = () => {
-    isAnimating = false;
+    isAnimating.current = false;
     resetTimer();
+    setPage(0);
     setRobotX(1);
     setRobotDir(0);
     setRobotY(1);
     setRobotState({ x: 1, y: 1, d: Direction.NORTH, s: -1 });
-    setPage(0);
   };
 
   /// Example addition to the robot movement logic
@@ -602,9 +605,8 @@ export default function Home() {
 
   // Function to clear the trace
   const clearTrace = () => {
-    setLeaveTrace(0);
+    setLeaveTrace(false);
     setPathHistory([]);
-    setTraceEnabled(true); // Re-enable tracing for new paths
   };
 
   const [robotX, setRobotX] = useState(1);
@@ -621,11 +623,10 @@ export default function Home() {
   const [configurations, setConfigurations] = useState(null);
   const [leaveTrace, setLeaveTrace] = useState(false);
   const [pathHistory, setPathHistory] = useState([]);
-  const [traceEnabled, setTraceEnabled] = useState(true);
   const [newpath, setnewPath] = useState([]);
   const [timer, setTimer] = useState(0);
   const timerInterval = useRef();
-  let isAnimating = false;
+  const isAnimating = useRef(false);
   let timerRunning = false;
 
   useEffect(() => {
@@ -759,9 +760,15 @@ export default function Home() {
                   </svg>
                 </Button>
 
-                <Button style="gradient-btn-cyan" onClick={startAnimation}>
-                  Start Animation
-                </Button>
+                {isAnimating.current ? (
+                  <Button style="gradient-btn-cyan" onClick={stopAnimation}>
+                    Stop Animation
+                  </Button>
+                ) : (
+                  <Button style="gradient-btn-cyan" onClick={startAnimation}>
+                    Start Animation
+                  </Button>
+                )}
 
                 <Button
                   style="outline-btn border-red-500 text-red-500 hover:bg-red-500"
