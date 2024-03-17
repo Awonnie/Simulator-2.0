@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { FaPlay } from "react-icons/fa";
+
 import PresetLoader from "./PresetLoader";
 import { QueryAPI } from "../helpers";
 import Button from "./components/Button";
@@ -38,7 +40,7 @@ const formatTimer = (seconds) => {
   const hours = Math.floor(seconds / 3600);
   const minutes = Math.floor((seconds % 3600) / 60);
   const remainingSeconds = seconds % 60;
-  return `${padZero(hours)}:${padZero(minutes)}:${padZero(remainingSeconds)}`;
+  return `${padZero(minutes)}:${padZero(remainingSeconds)}s`;
 };
 const onDelete = (e) => {
   e.preventDefault();
@@ -609,6 +611,22 @@ export default function Home() {
     setPathHistory([]);
   };
 
+  const prevCommand = () => {
+    setCommandIndex((prev) => {
+      prev--;
+      if (prev < 0) return 0;
+      return prev;
+    });
+  };
+
+  const nextCommand = () => {
+    setCommandIndex((prev) => {
+      prev++;
+      if (prev === commands.length) return prev - 1;
+      return prev;
+    });
+  };
+
   const [robotX, setRobotX] = useState(1);
   const [robotY, setRobotY] = useState(1);
   const [robotDir, setRobotDir] = useState(0);
@@ -616,6 +634,7 @@ export default function Home() {
   const [isComputing, setIsComputing] = useState(false);
   const [path, setPath] = useState([]);
   const [commands, setCommands] = useState([]);
+  const [commandIndex, setCommandIndex] = useState(0);
   const [distance, setDistance] = useState(0);
   const [page, setPage] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -623,7 +642,6 @@ export default function Home() {
   const [configurations, setConfigurations] = useState(null);
   const [leaveTrace, setLeaveTrace] = useState(false);
   const [pathHistory, setPathHistory] = useState([]);
-  const [newpath, setnewPath] = useState([]);
   const [timer, setTimer] = useState(0);
   const timerInterval = useRef();
   const isAnimating = useRef(false);
@@ -639,7 +657,6 @@ export default function Home() {
   useEffect(() => {
     if (page >= path.length) return;
     setRobotState(path[page]);
-    setnewPath(interpolatePath(path));
   }, [page, path]);
 
   useEffect(() => {
@@ -669,8 +686,9 @@ export default function Home() {
         <div className="border-2 border-purple-500 bg-white rounded-xl p-4 min-w-1/2 max-w-full">
           <div className="card-body items-center text-center p-4">
             <h2 className="text-2xl font-bold purple-gradient text-transparent bg-clip-text">
-              MDP AY23/24 Group 7 Algorithm Simulator
+              Main Controls
             </h2>
+            <div className="divider"></div>
             <h2 className="text-xl font-semibold purple-gradient text-transparent bg-clip-text">
               Robot Position
             </h2>
@@ -728,95 +746,123 @@ export default function Home() {
               Submit
             </Button>
           </div>
-
+          <div className="divider"></div>
           {path.length > 0 && (
-            <div className="flex-col justify-center space-y-4">
-              {/* Timer display */}
-              <div className="text-center mt-4">
-                <h2 className="font-semibold text-xl purple-gradient text-transparent bg-clip-text">
-                  Timer:{" "}
-                  <span className="purple-gradient text-transparent bg-clip-text">
-                    {formatTimer(timer)}
-                  </span>
+            <>
+              <div className="flex-col justify-center space-y-4">
+                {/* Timer display */}
+                <div className="text-center mt-4">
+                  <h2 className="font-semibold text-xl purple-gradient text-transparent bg-clip-text">
+                    Distance: {distance} units
+                  </h2>
+                  <h2 className="font-semibold text-xl purple-gradient text-transparent bg-clip-text">
+                    Timer: {formatTimer(timer)}
+                  </h2>
+                </div>
+
+                {/* Animation controls */}
+                <div className="flex justify-center space-x-1">
+                  <Button
+                    style="outline-btn border-cyan-400 text-cyan-300 hover:bg-cyan-400"
+                    onClick={startImmediate}
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="32"
+                      height="32"
+                      fill="currentColor"
+                      class="bi bi-skip-forward-fill"
+                      viewBox="0 0 16 16"
+                    >
+                      {" "}
+                      <path d="M15.5 3.5a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V8.753l-6.267 3.636c-.54.313-1.233-.066-1.233-.697v-2.94l-6.267 3.636C.693 12.703 0 12.324 0 11.693V4.308c0-.63.693-1.01 1.233-.696L7.5 7.248v-2.94c0-.63.693-1.01 1.233-.696L15 7.248V4a.5.5 0 0 1 .5-.5z" />{" "}
+                    </svg>
+                  </Button>
+
+                  {isAnimating.current ? (
+                    <Button style="gradient-btn-cyan" onClick={stopAnimation}>
+                      Stop Animation
+                    </Button>
+                  ) : (
+                    <Button style="gradient-btn-cyan" onClick={startAnimation}>
+                      Start Animation
+                    </Button>
+                  )}
+
+                  <Button
+                    style="outline-btn border-red-500 text-red-500 hover:bg-red-500"
+                    onClick={clearAnimation}
+                  >
+                    <svg
+                      width="32"
+                      height="32"
+                      viewBox="0 0 32 32"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <line
+                        x1="0"
+                        y1="32"
+                        x2="32"
+                        y2="0"
+                        stroke-width="2"
+                        stroke="currentColor"
+                      />
+                      <line
+                        x1="0"
+                        y1="0"
+                        x2="32"
+                        y2="32"
+                        stroke-width="2"
+                        stroke="currentColor"
+                      />
+                    </svg>
+                  </Button>
+                </div>
+
+                <div className="flex justify-center space-x-1">
+                  <Button
+                    style={
+                      leaveTrace
+                        ? "base-btn bg-green-400"
+                        : "outline-btn border-green-400 text-green-400 hover:bg-green-400"
+                    }
+                    onClick={() => setLeaveTrace(!leaveTrace)}
+                  >
+                    {leaveTrace ? "Leave Trace: ON" : "Leave Trace: OFF"}
+                  </Button>
+
+                  <Button style="outline-btn-red" onClick={clearTrace}>
+                    Clear Trace
+                  </Button>
+                </div>
+              </div>
+              <div className="divider"></div>
+              <div className="flex-col justify-center items-center space-y-2">
+                <h2 className="text-center font-semibold text-xl purple-gradient text-transparent bg-clip-text">
+                  Commands
                 </h2>
-              </div>
-
-              {/* Animation controls */}
-              <div className="flex justify-center space-x-1">
-                <Button
-                  style="outline-btn border-cyan-400 text-cyan-300 hover:bg-cyan-400"
-                  onClick={startImmediate}
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="32"
-                    height="32"
-                    fill="currentColor"
-                    class="bi bi-skip-forward-fill"
-                    viewBox="0 0 16 16"
+                <div className="flex justify-center join">
+                  <Button
+                    style="join-item base-btn purple-gradient"
+                    onClick={prevCommand}
                   >
-                    {" "}
-                    <path d="M15.5 3.5a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V8.753l-6.267 3.636c-.54.313-1.233-.066-1.233-.697v-2.94l-6.267 3.636C.693 12.703 0 12.324 0 11.693V4.308c0-.63.693-1.01 1.233-.696L7.5 7.248v-2.94c0-.63.693-1.01 1.233-.696L15 7.248V4a.5.5 0 0 1 .5-.5z" />{" "}
-                  </svg>
-                </Button>
-
-                {isAnimating.current ? (
-                  <Button style="gradient-btn-cyan" onClick={stopAnimation}>
-                    Stop Animation
+                    «
                   </Button>
-                ) : (
-                  <Button style="gradient-btn-cyan" onClick={startAnimation}>
-                    Start Animation
+                  <Button style="join-item base-btn purple-gradient">
+                    {commands[commandIndex]}
                   </Button>
-                )}
-
-                <Button
-                  style="outline-btn border-red-500 text-red-500 hover:bg-red-500"
-                  onClick={clearAnimation}
-                >
-                  <svg
-                    width="32"
-                    height="32"
-                    viewBox="0 0 32 32"
-                    xmlns="http://www.w3.org/2000/svg"
+                  <Button style="join-item base-btn purple-gradient">
+                    <FaPlay />
+                  </Button>
+                  <Button
+                    style="join-item base-btn purple-gradient"
+                    onClick={nextCommand}
                   >
-                    <line
-                      x1="0"
-                      y1="32"
-                      x2="32"
-                      y2="0"
-                      stroke-width="2"
-                      stroke="currentColor"
-                    />
-                    <line
-                      x1="0"
-                      y1="0"
-                      x2="32"
-                      y2="32"
-                      stroke-width="2"
-                      stroke="currentColor"
-                    />
-                  </svg>
-                </Button>
+                    »
+                  </Button>
+                </div>
               </div>
-
-              <div className="flex justify-center space-x-1">
-                <Button
-                  style={
-                    leaveTrace
-                      ? "base-btn bg-green-400"
-                      : "outline-btn border-green-400 text-green-400 hover:bg-green-400"
-                  }
-                  onClick={() => setLeaveTrace(!leaveTrace)}
-                >
-                  {leaveTrace ? "Leave Trace: ON" : "Leave Trace: OFF"}
-                </Button>
-
-                <Button style="outline-btn-red" onClick={clearTrace}>
-                  Clear Trace
-                </Button>
-              </div>
-            </div>
+            </>
           )}
         </div>
 
@@ -832,40 +878,6 @@ export default function Home() {
           </div>
         </div>
       </div>
-
-      {/* Path Info */}
-      {path.length > 0 && (
-        <div className="container flex justify-center my-4">
-          {/* List of path commands */}
-          <div className="w-3/4">
-            <div className="flex flex-col items-center text-center bg-purple-100 p-4 rounded-xl shadow-md">
-              <h2 className="text-xl font-semibold text-purple-700 mb-2">
-                Path Commands
-              </h2>
-              {commands.map((_, index) => (
-                <div key={index} className="text-purple-800 py-1">
-                  {`Step ${index + 1}: ${commands[index]}`}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* For last checkpoint */}
-          <div className="w-1/4">
-            <div className="flex flex-col items-center text-center bg-purple-100 p-4 rounded-xl shadow-md">
-              <h2 className="text-xl font-semibold text-purple-700 mb-2">
-                Fastest Path
-              </h2>
-              <h2 className="text-xl font-semibold text-purple-500">
-                Distance: {distance}cm
-              </h2>
-              <h2 className="text-xl font-semibold text-purple-500">
-                Timing: {duration}s
-              </h2>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Obstacle List View */}
       {obstacles.length > 0 && (

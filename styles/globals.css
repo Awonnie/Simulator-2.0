@@ -38,6 +38,9 @@ body {
   .outline-btn-red {
     @apply base-btn border-2 border-red-500 bg-white text-red-500 hover:bg-red-500 hover:text-white;
   }
+  .outline-btn-purple {
+    @apply base-btn border-2 border-purple-500 bg-white text-purple-500 hover:bg-purple-500 hover:text-white;
+  }
 
   .purple-gradient {
     @apply bg-gradient-to-tr border-purple-500  from-indigo-500 via-purple-500 to-pink-500;
