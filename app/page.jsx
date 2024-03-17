@@ -1,9 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { FaPlay } from "react-icons/fa";
 
-import PresetLoader from "./PresetLoader";
 import { QueryAPI } from "../helpers";
 import Button from "./components/Button";
 
@@ -13,14 +11,6 @@ const Direction = {
   SOUTH: 4,
   WEST: 6,
   SKIP: 8,
-};
-
-const DirectionToString = {
-  0: "Up",
-  2: "Right",
-  4: "Down",
-  6: "Left",
-  8: "None",
 };
 
 const hashString = (str) => {
@@ -37,15 +27,9 @@ const hashString = (str) => {
 };
 // Function to format the timer value into HH:mm:ss format
 const formatTimer = (seconds) => {
-  const hours = Math.floor(seconds / 3600);
   const minutes = Math.floor((seconds % 3600) / 60);
   const remainingSeconds = seconds % 60;
   return `${padZero(minutes)}:${padZero(remainingSeconds)}s`;
-};
-const onDelete = (e) => {
-  e.preventDefault();
-  e.target.classList.remove("text-red-500");
-  e.target.classList.add("text-white", "bg-red-500", "scale-125");
 };
 
 const offDelete = (e) => {
@@ -63,7 +47,7 @@ function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
-export default function Home() {
+export default function Home({ obstacles, setObstacles }) {
   function interpolatePath(path) {
     let interpolatedPath = [];
 
@@ -97,22 +81,6 @@ export default function Home() {
 
     return interpolatedPath;
   }
-
-  const generateNewID = () => {
-    while (true) {
-      let new_id = Math.floor(Math.random() * 10) + 1; // just try to generate an id;
-      let ok = true;
-      for (const ob of obstacles) {
-        if (ob.id === new_id) {
-          ok = false;
-          break;
-        }
-      }
-      if (ok) {
-        return new_id;
-      }
-    }
-  };
 
   const generateRobotCells = () => {
     const robotCells = [];
@@ -181,49 +149,6 @@ export default function Home() {
     }
     // If the input is not an integer or is not in the range [1, 18], set the input to 1
     setRobotY(1);
-  };
-
-  const saveConfig = () => {
-    let obs = obstacles;
-    let newConfigs = { ...configurations };
-    let itExists = false;
-
-    if (newConfigs !== null) {
-      newConfigs[configName] = obstacles;
-      setConfigurations(newConfigs);
-      return;
-    }
-
-    //Check with the current configuration via id and see if it exists
-    for (const name in configurations) {
-      if (configurations[name].length != obs.length) continue;
-      let config = configurations[name];
-      itExists = true;
-
-      //Before comparing their ids, we standardise by sorting them
-      config.sort((a, b) => a.id - b.id);
-      obs.sort((a, b) => a.id - b.id);
-      for (let i = 0; i < config.length; i++) {
-        //If any of the ids dont match, we can skip to the next configuration
-        if (config[i].id != obs[i].id) {
-          itExists = false;
-          break;
-        }
-      }
-
-      if (itExists) {
-        if (name === configName) {
-          return;
-        } //If it exists and the name is the same, you dont need to save, can just return
-
-        //If it exists and the name is different, you need to update the name
-        delete newConfigs[name];
-        break;
-      }
-    }
-
-    newConfigs[configName] = obstacles;
-    setConfigurations(newConfigs);
   };
 
   const onClickObstacle = (obInput) => {
@@ -359,17 +284,6 @@ export default function Home() {
   const renderGrid = () => {
     // Initialize the empty rows array
     const rows = [];
-
-    const baseStyle = {
-      width: 25,
-      height: 25,
-      borderStyle: "solid",
-      borderTopWidth: 1,
-      borderBottomWidth: 1,
-      borderLeftWidth: 1,
-      borderRightWidth: 1,
-      padding: 0,
-    };
 
     // Generate robot cells
     const robotCells = generateRobotCells();
@@ -630,14 +544,11 @@ export default function Home() {
   const [robotX, setRobotX] = useState(1);
   const [robotY, setRobotY] = useState(1);
   const [robotDir, setRobotDir] = useState(0);
-  const [obstacles, setObstacles] = useState([]);
   const [path, setPath] = useState([]);
   const [commands, setCommands] = useState([]);
   const [commandIndex, setCommandIndex] = useState(0);
   const [distance, setDistance] = useState(0);
   const [page, setPage] = useState(0);
-  const [configName, setConfigName] = useState("");
-  const [configurations, setConfigurations] = useState(null);
   const [leaveTrace, setLeaveTrace] = useState(false);
   const [pathHistory, setPathHistory] = useState([]);
   const [timer, setTimer] = useState(0);
@@ -647,22 +558,9 @@ export default function Home() {
   let timerRunning = false;
 
   useEffect(() => {
-    let configList = JSON.parse(localStorage.getItem("Obstacle Presets"));
-    if (configList !== null) {
-      setConfigurations(configList);
-    }
-  }, []);
-
-  useEffect(() => {
     if (page >= path.length) return;
     setRobotState(path[page]);
   }, [page, path]);
-
-  useEffect(() => {
-    if (configurations !== null) {
-      localStorage.setItem("Obstacle Presets", JSON.stringify(configurations));
-    }
-  }, [obstacles, configurations]);
 
   const [robotState, setRobotState] = useState({
     x: 1,
@@ -680,9 +578,9 @@ export default function Home() {
   };
 
   return (
-    <div className="w-screen flex flex-col items-center justify-center p-6 bg-gray-50">
-      <div className="w-full lg:flex lg:justify-center my-10 lg:space-x-9">
-        <div className="border-2 border-purple-500 bg-white rounded-xl p-4 w-full lg:w-1/3">
+    <div className="w-screen h-full flex flex-col items-center justify-center p-6 bg-gray-50">
+      <div className="w-full lg:flex lg:justify-center space-y-4 lg:space-x-9 lg:items-center">
+        <div className="border-2 border-purple-500 bg-white rounded-xl w-full lg:w-1/3 p-4">
           <div className="card-body items-center text-center p-4">
             <h2 className="text-2xl font-bold purple-gradient text-transparent bg-clip-text">
               Main Controls
@@ -902,76 +800,14 @@ export default function Home() {
         </div>
 
         {/* Grid */}
-        <div className="flex justify-center w-1/2 h-full my-4">
+        <div className="bg-white border-2 rounded-xl border-purple-500 flex justify-center lg:w-1/2 w-full max-h-full p-4">
           <div className="w-full flex justify-center">
             <table className="content-right border-collapse border border-purple-500 w-auto text-sm">
-              <tbody>
-                {renderGrid()}{" "}
-                {/* Ensure this function outputs rows and cells with appropriate styling */}
-              </tbody>
+              <tbody>{renderGrid()} </tbody>
             </table>
           </div>
         </div>
       </div>
-
-      {/* Obstacle List View */}
-      {obstacles.length > 0 && (
-        <div className="bg-white rounded-xl shadow-xl mb-8 p-4 w-full max-w-4xl">
-          <div className="card-body items-center text-center p-4">
-            <h2 className="text-xl font-semibold purple-gradient text-transparent bg-clip-text">
-              Current Obstacles
-            </h2>
-            <div className="grid grid-cols-5 gap-5 p-5">
-              {obstacles.map((ob) => {
-                return (
-                  <div
-                    key={ob}
-                    className="flex justify-evenly items-center bg-white rounded-lg shadow-md p-3 border border-purple-300 text-purple-800 cursor-pointer hover:-translate-y-2 hover:scale-105 hover:bg-purple-800 hover:text-white transition duration-150 ease-in-out"
-                    draggable
-                    onDragStart={(e) =>
-                      e.dataTransfer.setData("ObInfo", JSON.stringify(ob))
-                    }
-                  >
-                    <div className="flex flex-col">
-                      <div className="font-semibold">
-                        (x:{ob.x} , y:{ob.y})
-                      </div>
-                      <div className="font-semibold">
-                        D: {DirectionToString[ob.d]}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-            <div className="container flex justify-evenly">
-              <div className="w-1/2 h-100% purple-gradient rounded-md p-1">
-                <input
-                  type="text"
-                  className="w-full h-full rounded-md text-center text-gray-900 hover:shadow-inner focus:outline-none"
-                  value={configName}
-                  placeholder={configName}
-                  onChange={(e) => setConfigName(e.target.value)}
-                />
-              </div>
-
-              <Button style={"gradient-btn-purple"} onClick={saveConfig}>
-                Save Configuration
-              </Button>
-
-              <Button style={"outline-btn-red"}>Delete</Button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Configurations Loader */}
-      <PresetLoader
-        setConfigName={setConfigName}
-        setObstacles={setObstacles}
-        configurations={configurations}
-        setConfigurations={setConfigurations}
-      />
     </div>
   );
 }
