@@ -515,7 +515,7 @@ export default function Home() {
   // Function to start the timer
   const startTimer = () => {
     if (!timerRunning) {
-      setTimerRunning(true);
+      timerRunning = true;
       setTimer((prevTimer) => prevTimer + 1);
 
       // Set the timerInterval state with the interval ID
@@ -524,7 +524,7 @@ export default function Home() {
       }, 1000);
 
       // Store the interval ID in timerInterval state
-      setTimerInterval(intervalId);
+      timerInterval.current = intervalId;
     }
   };
 
@@ -532,19 +532,19 @@ export default function Home() {
   const stopTimer = () => {
     if (timerRunning) {
       // Clear the interval using the stored interval ID
-      clearInterval(timerInterval);
-      setTimerRunning(false);
+      clearInterval(timerInterval.current);
+      timerRunning = false;
     }
   };
 
   // Function to reset the timer
   const resetTimer = () => {
-    if (timerInterval) {
+    if (timerInterval.current) {
       // Clear the interval using the stored interval ID
-      clearInterval(timerInterval);
+      clearInterval(timerInterval.current);
     }
     setTimer(0);
-    setTimerRunning(false);
+    timerRunning = false;
   };
 
   async function sleep(seconds) {
@@ -564,10 +564,10 @@ export default function Home() {
 
   // Function to start the animation
   const startAnimation = async () => {
-    isAnimating.current = true;
+    isAnimating = true;
     startTimer();
     for (let i = 0; i < path.length; i++) {
-      if (!isAnimating.current) {
+      if (!isAnimating) {
         setPage(0);
         break;
       }
@@ -578,7 +578,7 @@ export default function Home() {
         setTraceEnabled(false);
       }
       if (i + 1 == path.length) {
-        isAnimating.current = false;
+        isAnimating = false;
         stopTimer();
       }
     }
@@ -586,7 +586,7 @@ export default function Home() {
 
   // Function to clear the animation
   const clearAnimation = () => {
-    isAnimating.current = false;
+    isAnimating = false;
     resetTimer();
     setRobotX(1);
     setRobotDir(0);
@@ -624,9 +624,9 @@ export default function Home() {
   const [traceEnabled, setTraceEnabled] = useState(true);
   const [newpath, setnewPath] = useState([]);
   const [timer, setTimer] = useState(0);
-  const [timerRunning, setTimerRunning] = useState(false);
-  const [timerInterval, setTimerInterval] = useState(null);
-  const isAnimating = useRef(false);
+  const timerInterval = useRef();
+  let isAnimating = false;
+  let timerRunning = false;
 
   useEffect(() => {
     let configList = JSON.parse(localStorage.getItem("Obstacle Presets"));
