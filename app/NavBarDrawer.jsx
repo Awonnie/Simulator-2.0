@@ -30,18 +30,10 @@ const NavBarDrawer = () => {
               </svg>
             </label>
           </div>
-          <div className="navbar-center -m-20">
+          <div className="navbar-center">
             <span className="font-bold text-xl purple-gradient text-transparent bg-clip-text">
-              MDP Group 7 Simulator
+              MDP AY23/24 Group 7 Algorithm Simulator
             </span>
-          </div>
-          <div className="navbar-end flex space-x-3">
-            <Button style="base-btn rounded-full hover:bg-green-400">
-              /image
-            </Button>
-            <Button style="base-btn rounded-full hover:bg-green-400">
-              /stitch
-            </Button>
           </div>
         </div>
       </div>
