@@ -3,12 +3,12 @@ import Button from "./components/Button";
 
 const NavBarDrawer = () => {
   return (
-    <div className="drawer sticky top-0">
+    <div className="drawer sticky top-0 z-50">
       <input id="my-drawer-3" type="checkbox" className="drawer-toggle" />
       <div className="drawer-content flex flex-col">
         {/* Navbar */}
         <div className="w-full navbar border-2 border-purple-500 bg-white">
-          <div className="flex-none lg:invisible navbar-start ">
+          <div className="flex navbar-start max-w-16">
             <label
               htmlFor="my-drawer-3"
               aria-label="open sidebar"
@@ -30,7 +30,7 @@ const NavBarDrawer = () => {
               </svg>
             </label>
           </div>
-          <div className="navbar-center">
+          <div className="flex navbar-center w-full justify-center">
             <span className="font-bold text-xl purple-gradient text-transparent bg-clip-text">
               MDP AY23/24 Group 7 Algorithm Simulator
             </span>

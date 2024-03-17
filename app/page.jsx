@@ -681,8 +681,8 @@ export default function Home() {
 
   return (
     <div className="w-screen flex flex-col items-center justify-center p-6 bg-gray-50">
-      <div className="w-full lg:flex lg:justify-center my-10 lg:space-x-9">
-        <div className="border-2 border-purple-500 bg-white rounded-xl p-4 w-full lg:w-1/3">
+      <div className="w-full lg:flex lg:justify-center space-y-4 lg:space-x-9 lg:items-center">
+        <div className="border-2 border-purple-500 bg-white rounded-xl w-full lg:w-1/3 p-4">
           <div className="card-body items-center text-center p-4">
             <h2 className="text-2xl font-bold purple-gradient text-transparent bg-clip-text">
               Main Controls
@@ -902,13 +902,10 @@ export default function Home() {
         </div>
 
         {/* Grid */}
-        <div className="flex justify-center w-1/2 h-full my-4">
+        <div className="bg-white border-2 rounded-xl border-purple-500 flex justify-center lg:w-1/2 w-full h-full p-4">
           <div className="w-full flex justify-center">
             <table className="content-right border-collapse border border-purple-500 w-auto text-sm">
-              <tbody>
-                {renderGrid()}{" "}
-                {/* Ensure this function outputs rows and cells with appropriate styling */}
-              </tbody>
+              <tbody>{renderGrid()} </tbody>
             </table>
           </div>
         </div>
