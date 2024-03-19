@@ -2,8 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 
+import Image from 'next/image';
 import { QueryAPI } from "../helpers";
 import Button from "./components/Button";
+
 
 const Direction = {
   NORTH: 0,
@@ -389,7 +391,7 @@ export default function Home({ obstacles, setObstacles }) {
           cells.push(
             <td
               className={`border w-5 h-5 md:w-8 md:h-8 transition ${
-                foundTraceCell.s != -1 ? "bg-red-500" : "bg-blue-500"
+                foundTraceCell.s != -1 ? "bg-red-500" : "bg-red-900"
               }`} // Example style for path history cells
             />
           );
@@ -401,7 +403,7 @@ export default function Home({ obstacles, setObstacles }) {
           };
           cells.push(
             <td
-              className="border-black border w-5 h-5 md:w-8 md:h-8 hover:bg-blue-700 cursor-pointer transition"
+              className="border-white border w-5 h-5 md:w-8 md:h-8 hover:bg-blue-700 cursor-pointer transition"
               onClick={() => onClickObstacle(ob)}
               onDragOver={(e) => dragOver(e)}
               onDragLeave={(e) => dragOut(e)}
@@ -578,15 +580,22 @@ export default function Home({ obstacles, setObstacles }) {
   };
 
   return (
-    <div className="w-screen h-full flex flex-col items-center justify-center p-6 bg-gray-50">
+    <div className="w-screen h-full flex flex-col items-center justify-center p-6 bg-black">
       <div className="w-full lg:flex lg:justify-center space-y-4 lg:space-x-9 lg:items-center">
-        <div className="border-2 border-purple-500 bg-white rounded-xl w-full lg:w-1/3 p-4">
-          <div className="card-body items-center text-center p-4">
-            <h2 className="text-2xl font-bold purple-gradient text-transparent bg-clip-text">
-              Main Controls
+        <div className="border-2 border-theme-red bg-black rounded-xl w-full lg:w-1/3 p-4">
+          <div className="card-body items-center text-center p-4 bg-black">
+            <h2 className="text-2l font-bold bg-bright-gradient text-transparent bg-clip-text">
+            "It ain’t about how hard you hit. It’s about how hard you can get hit and keep moving forward; how much you can take and keep moving forward. That’s how winning is done!"<br />- Rocky 2006
             </h2>
-            <div className="divider"></div>
-            <h2 className="text-xl font-semibold purple-gradient text-transparent bg-clip-text">
+            <div className="custom-shape h-36 w-36 relative">
+            <Image
+              src={`/images/rocky.png`}
+              alt="Gold Medal"
+              layout="fill"
+              objectFit="contain"
+              />
+            </div>
+            <h2 className="text-xl font-semibold bg-bright-gradient text-transparent bg-clip-text">
               Robot Position
             </h2>
             <div className="form-control mt-4">
@@ -640,7 +649,7 @@ export default function Home({ obstacles, setObstacles }) {
             <Button style={"gradient-btn-yellow"} onClick={onResetAll}>
               Reset All
             </Button>
-            <Button style={"gradient-btn-purple"} onClick={onReset}>
+            <Button style={"gradient-btn-cyan"} onClick={onReset}>
               Reset Robot
             </Button>
             {isComputing ? (
@@ -654,12 +663,12 @@ export default function Home({ obstacles, setObstacles }) {
               <Button
                 style={
                   obstacles.length > 0
-                    ? "gradient-btn-cyan"
+                    ? "gradient-btn-purple"
                     : "outline-btn btn-disabled"
                 }
                 onClick={compute}
               >
-                Submit
+                FIGHT!
               </Button>
             )}
           </div>
@@ -669,10 +678,10 @@ export default function Home({ obstacles, setObstacles }) {
               <div className="flex-col justify-center space-y-4">
                 {/* Timer display */}
                 <div className="text-center mt-4">
-                  <h2 className="font-semibold text-xl purple-gradient text-transparent bg-clip-text">
+                  <h2 className="font-semibold text-xl purple-gradient bg-clip-text">
                     Distance: {distance} units
                   </h2>
-                  <h2 className="font-semibold text-xl purple-gradient text-transparent bg-clip-text">
+                  <h2 className="font-semibold text-xl purple-gradient bg-clip-text">
                     Timer: {formatTimer(timer)}
                   </h2>
                 </div>
@@ -755,7 +764,7 @@ export default function Home({ obstacles, setObstacles }) {
               </div>
               <div className="divider"></div>
               <div className="flex-col justify-center items-center space-y-2">
-                <h2 className="text-center font-semibold text-xl purple-gradient text-transparent bg-clip-text">
+                <h2 className="text-center font-semibold text-xl purple-gradient bg-clip-text">
                   Commands
                 </h2>
                 <div className="flex justify-center join">
@@ -800,9 +809,9 @@ export default function Home({ obstacles, setObstacles }) {
         </div>
 
         {/* Grid */}
-        <div className="bg-white border-2 rounded-xl border-purple-500 flex justify-center lg:w-1/2 w-full max-h-full p-4">
+        <div className="bg-black border-2 rounded-xl border-white flex justify-center lg:w-1/2 w-full max-h-full p-4">
           <div className="w-full flex justify-center">
-            <table className="content-right border-collapse border border-purple-500 w-auto text-sm">
+            <table className="content-right border-collapse border border-white w-auto text-sm">
               <tbody>{renderGrid()} </tbody>
             </table>
           </div>

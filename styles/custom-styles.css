@@ -28,3 +28,7 @@
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
+.custom-shape {
+  clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+}
