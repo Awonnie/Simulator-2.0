@@ -3,10 +3,12 @@
 @tailwind utilities;
 
 :root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
+  --rocky-black: #343a40;
+  --rocky-grey: #ced4da;
+  --rocky-red: #dc3545;
+  --rocky-gold: #ffc107;
 }
+
 
 @media (prefers-color-scheme: dark) {
   :root {
