@@ -28,18 +28,3 @@
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
-
-.body-text {
-  font-family: 'Roboto', sans-serif;
-  color: var(--rocky-gray);
-}
-
-.fight-button {
-  background-color: var(--rocky-black);
-  color: var(--rocky-gold);
-  font-family: var(--font-heading);
-}
-
-h1, h2, h3 {
-  font-family: 'Roboto Slab', serif;
-}
