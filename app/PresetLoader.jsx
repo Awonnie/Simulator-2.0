@@ -17,16 +17,16 @@ export default function PresetLoader({
   return (
     <>
       {configurations && (
-        <div className="flex justify-center max-h-96 w-full overflow-y-scroll bg-white rounded-xl border-2 border-purple-500 mb-8 p-4 no-scrollbar">
+        <div className="flex justify-center max-h-96 w-full overflow-y-scroll bg-gray-800 rounded-xl border-2 border-theme-gold mb-8 p-4 no-scrollbar">
           <table className="table">
             {/* head */}
             <thead>
               <tr>
                 <th></th>
-                <th className="font-bold text-lg purple-gradient text-transparent bg-clip-text">
+                <th className="font-bold text-lg gradient-main-light text-transparent bg-clip-text">
                   Preset Name
                 </th>
-                <th className="font-bold text-lg purple-gradient text-transparent bg-clip-text">
+                <th className="font-bold text-lg gradient-main-light text-transparent bg-clip-text">
                   Number of Obstacles
                 </th>
               </tr>
@@ -36,7 +36,7 @@ export default function PresetLoader({
               {Object.entries(configurations).map(([key, value]) => (
                 <tr>
                   <th></th>
-                  <td className="font-semibold text-base purple-gradient text-transparent bg-clip-text">
+                  <td className="font-semibold text-base gradient-main-light text-transparent bg-clip-text">
                     {key}
                   </td>
                   <td></td>

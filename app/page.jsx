@@ -2,10 +2,9 @@
 
 import { useEffect, useRef, useState } from "react";
 
-import Image from 'next/image';
+import Image from "next/image";
 import { QueryAPI } from "../helpers";
 import Button from "./components/Button";
-
 
 const Direction = {
   NORTH: 0,
@@ -295,7 +294,7 @@ export default function Home({ obstacles, setObstacles }) {
       const cells = [
         // Header cells
         <td key={i} className="w-5 h-5 md:w-8 md:h-8">
-          <span className="text-sky-900 font-bold text-[0.6rem] md:text-base ">
+          <span className="font-bold text-[0.6rem] md:text-base gradient-main-light text-transparent bg-clip-text">
             {19 - i}
           </span>
         </td>,
@@ -420,7 +419,7 @@ export default function Home({ obstacles, setObstacles }) {
     for (let i = 0; i < 20; i++) {
       yAxis.push(
         <td className="w-5 h-5 md:w-8 md:h-8">
-          <span className="text-sky-900 font-bold text-[0.6rem] md:text-base ">
+          <span className="font-bold text-[0.6rem] md:text-base gradient-main-light text-transparent bg-clip-text">
             {i}
           </span>
         </td>
@@ -585,14 +584,17 @@ export default function Home({ obstacles, setObstacles }) {
         <div className="border-2 border-theme-red bg-black rounded-xl w-full lg:w-1/3 p-4">
           <div className="card-body items-center text-center p-4 bg-black">
             <h2 className="text-2l font-bold bg-bright-gradient text-transparent bg-clip-text">
-            "It ain’t about how hard you hit. It’s about how hard you can get hit and keep moving forward; how much you can take and keep moving forward. That’s how winning is done!"<br />- Rocky 2006
+              "It ain’t about how hard you hit. It’s about how hard you can get
+              hit and keep moving forward; how much you can take and keep moving
+              forward. That’s how winning is done!"
+              <br />- Rocky 2006
             </h2>
             <div className="custom-shape h-36 w-36 relative">
-            <Image
-              src={`/images/rocky.png`}
-              alt="Gold Medal"
-              layout="fill"
-              objectFit="contain"
+              <Image
+                src={`/images/rocky.png`}
+                alt="Gold Medal"
+                layout="fill"
+                objectFit="contain"
               />
             </div>
             <h2 className="text-xl font-semibold bg-bright-gradient text-transparent bg-clip-text">
@@ -600,7 +602,7 @@ export default function Home({ obstacles, setObstacles }) {
             </h2>
             <div className="form-control mt-4">
               <label className="input-group input-group-horizontal">
-                <span className="purple-gradient text-white p-2 rounded-l input-sm">
+                <span className="gradient-main text-white p-2 rounded-l input-sm">
                   X
                 </span>
                 <input
@@ -611,9 +613,7 @@ export default function Home({ obstacles, setObstacles }) {
                   max="18"
                   className="input input-bordered rounded-none input-sm text-purple-900"
                 />
-                <span className="purple-gradient text-white p-2 input-sm">
-                  Y
-                </span>
+                <span className="gradient-main text-white p-2 input-sm">Y</span>
                 <input
                   onChange={onChangeRobotY}
                   type="number"
@@ -622,9 +622,7 @@ export default function Home({ obstacles, setObstacles }) {
                   max="18"
                   className="input input-bordered rounded-none input-sm text-purple-900"
                 />
-                <span className="purple-gradient text-white p-2 input-sm">
-                  D
-                </span>
+                <span className="gradient-main text-white p-2 input-sm">D</span>
                 <select
                   onChange={onRobotDirectionInputChange}
                   value={robotDir}
@@ -636,7 +634,7 @@ export default function Home({ obstacles, setObstacles }) {
                   <option value={ObDirection.EAST}>Right</option>
                 </select>
                 <button
-                  className="purple-gradient text-white p-2 font-bold rounded-r"
+                  className="gradient-main text-white p-2 font-bold rounded-r"
                   onClick={onClickRobot}
                 >
                   Set
@@ -678,10 +676,10 @@ export default function Home({ obstacles, setObstacles }) {
               <div className="flex-col justify-center space-y-4">
                 {/* Timer display */}
                 <div className="text-center mt-4">
-                  <h2 className="font-semibold text-xl purple-gradient bg-clip-text">
+                  <h2 className="font-semibold text-xl gradient-main bg-clip-text">
                     Distance: {distance} units
                   </h2>
-                  <h2 className="font-semibold text-xl purple-gradient bg-clip-text">
+                  <h2 className="font-semibold text-xl gradient-main bg-clip-text">
                     Timer: {formatTimer(timer)}
                   </h2>
                 </div>
@@ -764,12 +762,12 @@ export default function Home({ obstacles, setObstacles }) {
               </div>
               <div className="divider"></div>
               <div className="flex-col justify-center items-center space-y-2">
-                <h2 className="text-center font-semibold text-xl purple-gradient bg-clip-text">
+                <h2 className="text-center font-semibold text-xl gradient-main bg-clip-text">
                   Commands
                 </h2>
                 <div className="flex justify-center join">
                   <Button
-                    style="join-item base-btn purple-gradient"
+                    style="join-item base-btn gradient-main"
                     onClick={prevCommand}
                   >
                     «
@@ -778,7 +776,7 @@ export default function Home({ obstacles, setObstacles }) {
                     <div
                       tabIndex={0}
                       role="button"
-                      className="base-btn purple-gradient"
+                      className="base-btn gradient-main"
                     >
                       {commands[commandIndex]}
                     </div>
@@ -789,7 +787,7 @@ export default function Home({ obstacles, setObstacles }) {
                       {commands.map((_, index) => (
                         <li
                           key={index}
-                          className="font-semibold text-center py-1 purple-gradient text-transparent bg-clip-text"
+                          className="font-semibold text-center py-1 gradient-main text-transparent bg-clip-text"
                         >
                           {commands[index]}
                         </li>
@@ -797,7 +795,7 @@ export default function Home({ obstacles, setObstacles }) {
                     </ul>
                   </div>
                   <Button
-                    style="join-item base-btn purple-gradient"
+                    style="join-item base-btn gradient-main"
                     onClick={nextCommand}
                   >
                     »

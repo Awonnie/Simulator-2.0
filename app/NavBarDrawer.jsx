@@ -1,53 +1,10 @@
 "use client";
 
-import Image from 'next/image';
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import PresetLoader from "./PresetLoader";
 import Button from "./components/Button";
 import Home from "./page";
-
-const saveConfig = () => {
-  let obs = obstacles;
-  let newConfigs = { ...configurations };
-  let itExists = false;
-
-  if (newConfigs !== null) {
-    newConfigs[configName] = obstacles;
-    setConfigurations(newConfigs);
-    return;
-  }
-
-  //Check with the current configuration via id and see if it exists
-  for (const name in configurations) {
-    if (configurations[name].length != obs.length) continue;
-    let config = configurations[name];
-    itExists = true;
-
-    //Before comparing their ids, we standardise by sorting them
-    config.sort((a, b) => a.id - b.id);
-    obs.sort((a, b) => a.id - b.id);
-    for (let i = 0; i < config.length; i++) {
-      //If any of the ids dont match, we can skip to the next configuration
-      if (config[i].id != obs[i].id) {
-        itExists = false;
-        break;
-      }
-    }
-
-    if (itExists) {
-      if (name === configName) {
-        return;
-      } //If it exists and the name is the same, you dont need to save, can just return
-
-      //If it exists and the name is different, you need to update the name
-      delete newConfigs[name];
-      break;
-    }
-  }
-
-  newConfigs[configName] = obstacles;
-  setConfigurations(newConfigs);
-};
 
 const DirectionToString = {
   0: "Up",
@@ -61,6 +18,49 @@ const NavBarDrawer = () => {
   const [obstacles, setObstacles] = useState([]);
   const [configName, setConfigName] = useState("");
   const [configurations, setConfigurations] = useState(null);
+
+  const saveConfig = () => {
+    let obs = obstacles;
+    let newConfigs = { ...configurations };
+    let itExists = false;
+
+    if (newConfigs !== null) {
+      newConfigs[configName] = obstacles;
+      setConfigurations(newConfigs);
+      return;
+    }
+
+    //Check with the current configuration via id and see if it exists
+    for (const name in configurations) {
+      if (configurations[name].length != obs.length) continue;
+      let config = configurations[name];
+      itExists = true;
+
+      //Before comparing their ids, we standardise by sorting them
+      config.sort((a, b) => a.id - b.id);
+      obs.sort((a, b) => a.id - b.id);
+      for (let i = 0; i < config.length; i++) {
+        //If any of the ids dont match, we can skip to the next configuration
+        if (config[i].id != obs[i].id) {
+          itExists = false;
+          break;
+        }
+      }
+
+      if (itExists) {
+        if (name === configName) {
+          return;
+        } //If it exists and the name is the same, you dont need to save, can just return
+
+        //If it exists and the name is different, you need to update the name
+        delete newConfigs[name];
+        break;
+      }
+    }
+
+    newConfigs[configName] = obstacles;
+    setConfigurations(newConfigs);
+  };
 
   useEffect(() => {
     let configList = JSON.parse(localStorage.getItem("Obstacle Presets"));
@@ -104,16 +104,16 @@ const NavBarDrawer = () => {
             </label>
           </div>
           <div className="flex navbar-center bg-red-950 w-full justify-center">
-          <div className="custom-shape h-12 w-12 relative">
-            <Image
-              src={`/images/gold-medal.png`}
-              alt="Gold Medal"
-              layout="fill"
-              objectFit="contain"
-            />
-          </div>
+            <div className="custom-shape h-12 w-12 relative">
+              <Image
+                src={`/images/gold-medal.png`}
+                alt="Gold Medal"
+                layout="fill"
+                objectFit="contain"
+              />
+            </div>
             <span className="font-bold text-xl from-theme-gold to-theme-dark-red bg-clip-text bg-red-950">
-                Group 7 Algorithm Training Centre
+              Group 7 Algorithm Training Centre
             </span>
             <div className="custom-shape h-12 w-12 relative">
               <Image
@@ -134,17 +134,15 @@ const NavBarDrawer = () => {
           aria-label="close sidebar"
           className="drawer-overlay"
         ></label>
-        <ul className="p-4 w-80 min-h-full bg-black border-r-4 border-theme-gold">
+        <ul className="p-4 w-3/4 lg:w-1/2 min-h-full bg-black border-r-4 border-theme-gold">
           {/* Sidebar content here */}
           <li>
             {/* Obstacle List View */}
             {obstacles.length > 0 && (
               <div className="flex justify-center bg-gray-800 rounded-xl border-2 border-theme-gold mb-8 p-4 w-full">
                 <div className="card-body items-center text-center p-4">
-                  <h2 className="text-xl font-semibold bg-gradient-to-r from-theme-gold to-theme-dark-red text-transparent bg-clip-text">
-                    Current Obstacles
-                  </h2>
-                  <div className="grid grid-cols-5 gap-5 p-5">
+                  <h2 className="gradient-text">Current Obstacles</h2>
+                  <div className="grid grid-cols-3 lg:grid-cols-6 gap-5 p-5">
                     {obstacles.map((ob) => {
                       return (
                         <div
