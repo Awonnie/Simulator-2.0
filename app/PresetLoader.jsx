@@ -39,7 +39,9 @@ export default function PresetLoader({
                   <td className="font-semibold text-base gradient-main-light text-transparent bg-clip-text">
                     {key}
                   </td>
-                  <td></td>
+                  <td className="font-semibold text-base gradient-main-light text-transparent bg-clip-text">
+                    {value.length}
+                  </td>
                   <td>
                     <Button
                       style={"gradient-btn-purple"}

@@ -141,7 +141,9 @@ const NavBarDrawer = () => {
             {obstacles.length > 0 && (
               <div className="flex justify-center bg-gray-800 rounded-xl border-2 border-theme-gold mb-8 p-4 w-full">
                 <div className="card-body items-center text-center p-4">
-                  <h2 className="gradient-text">Current Obstacles</h2>
+                  <h2 className="font-bold text-xl gradient-main-light text-transparent bg-clip-text">
+                    Current Obstacles
+                  </h2>
                   <div className="grid grid-cols-3 lg:grid-cols-6 gap-5 p-5">
                     {obstacles.map((ob) => {
                       return (
@@ -165,7 +167,7 @@ const NavBarDrawer = () => {
                       );
                     })}
                   </div>
-                  <div className="container flex justify-evenly">
+                  <div className="container flex justify-evenly max-h-[42px]">
                     <div className="w-1/2 h-100% bg-gray-900 rounded-md p-1">
                       <input
                         type="text"
@@ -176,7 +178,10 @@ const NavBarDrawer = () => {
                       />
                     </div>
 
-                    <Button style={"gradient-btn-purple"} onClick={saveConfig}>
+                    <Button
+                      style={"gradient-btn-purple text-sm"}
+                      onClick={saveConfig}
+                    >
                       Save Configuration
                     </Button>
 
