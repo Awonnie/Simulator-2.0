@@ -29,15 +29,23 @@ The app will be running at `localhost:3000`
 
 ## Usage
 
-The interface is as intuitive as it can get. Position the robot where you want it to be and click on the buttons to add obstacles. Then click on `Submit` to find the path, or `Reset All` to clear the map and put the robot back to the starting position. `Reset Robot` just resets the robot to the starting position without clearing the map.
+The interface is as intuitive as it can get. Position the robot where you want it via a drag-and-drop feature and press on the obstacle until you get the direction you want. Then, click on `Fight!` to find the path, or `Reset All` to clear the map and put the robot back to the starting position. `Reset Robot` just resets the robot to the starting position without clearing the map. Additionally, our simulator allows for users to save the configuration even if they refresh the page or restart the simulator.
 
 <div style="text-align:center"><img src="/images/1.png" alt="Interface" width=350 ></div>
 
-You can drag and drop obstacles. Click on it multiple times to change direction.
+You can drag and drop obstacles to set your obstacles.
+
+<div style="text-align:center"><img src="/images/2.png" alt="Interface" width=350 ></div>
+
+You can change the direction of the obstacle by pressing on it.
 
 <div style="text-align:center"><img src="/images/3.png" alt="Interface" width=350 ></div>
 
-Use left panel to view the command list of instructions sent back to the RPI.
+Press "Fight!", once you are ready to run the algorithm.
+
+<div style="text-align:center"><img src="/images/4.png" alt="Interface" width=350 ></div>
+
+Save your obstacle configuration via the left panel.
 
 Of course, sometimes you might think it's not going by the shortest path possible, but that's because of the various constraints and safeguards in the algorithm, which can all be tweaked in the code.
 
