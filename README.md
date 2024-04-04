@@ -53,6 +53,8 @@ The algorithm API server should be running at a specific address, which you will
 
 I am not responsible for any errors, mishaps, or damages that may occur from using this code. Use at your own risk. This code is provided as-is, with no warranty of any kind.
 
+The design and images on the simulator follows the theme of our submission video. You may reference our submisison video here: https://drive.google.com/file/d/1GPRpnJ904-zo72LHedQKrGKQRGebGnvu/view?usp=sharing
+
 # Acknowledgements
 
 I used [pysonekyaw](https://github.com/pyesonekyaw)'s simulator as a boilerplate and improved it significantly, such as adding no-direction obstacles, being able to change the robot's starting position, and revamped the user interface to make it more modern and intuitive.
