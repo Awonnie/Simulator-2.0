@@ -33,11 +33,9 @@ The interface is as intuitive as it can get. Position the robot where you want i
 
 <div style="text-align:center"><img src="/images/1.png" alt="Interface" width=350 ></div>
 
-You can drag and drop obstacles to set your obstacles.
-
 <div style="text-align:center"><img src="/images/2.png" alt="Interface" width=350 ></div>
 
-You can change the direction of the obstacle by pressing on it.
+You can drag and drop obstacles to set your obstacles and change the direction of the obstacle by pressing on it.
 
 <div style="text-align:center"><img src="/images/3.png" alt="Interface" width=350 ></div>
 
