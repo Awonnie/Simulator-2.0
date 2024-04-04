@@ -1,6 +1,5 @@
 <br />
 <p align="center">
-  <img src="/images/Map.png" alt="Logo" height=150 >
   <h1 align="center">
     CZ3004/SC2079 Multidisciplinary Project - Algorithm Simulator
   </h1>
@@ -34,11 +33,11 @@ The interface is as intuitive as it can get. Position the robot where you want i
 
 <div style="text-align:center"><img src="/images/1.jpg" alt="Interface" width=350 ></div>
 
-You can also add obstacles without a symbol card by choosing the 'None' option for the direction.
+You can drag and drop obstacles. Click on it multiple times to change direction.
 
 <div style="text-align:center"><img src="/images/3.jpg" alt="Interface" width=350 ></div>
 
-Use the left and right arrow buttons to go through the path step by step to see how the algorithm is working.
+Use left panel to view the command list of instructions sent back to the RPI.
 
 Of course, sometimes you might think it's not going by the shortest path possible, but that's because of the various constraints and safeguards in the algorithm, which can all be tweaked in the code.
 
