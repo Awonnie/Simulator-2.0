@@ -50,12 +50,8 @@ I am not responsible for any errors, mishaps, or damages that may occur from usi
 
 # Acknowledgements
 
-I used [Group 28](https://github.com/CZ3004-Group-28)'s simulator as a boilerplate and improved it significantly, such as adding no-direction obstacles, being able to change the robot's starting position, and revamped the user interface to make it more modern and intuitive.
+I used [pysonekyaw](https://github.com/pyesonekyaw)'s simulator as a boilerplate and improved it significantly, such as adding no-direction obstacles, being able to change the robot's starting position, and revamped the user interface to make it more modern and intuitive.
 
 # Related Repositories
-
-- [Website Repository](https://github.com/pyesonekyaw/MDP-Showcase)
-- [Algorithm](https://github.com/pyesonekyaw/CZ3004-SC2079-MDP-Algorithm)
-- [Raspberry Pi](https://github.com/pyesonekyaw/CZ3004-SC2079-MDP-RaspberryPi)
-- [Image Recognition](https://github.com/pyesonekyaw/CZ3004-SC2079-MDP-ImageRecognition)
+- [Algorithm](https://github.com/Awonnie/Algorithm-2.0)
 
