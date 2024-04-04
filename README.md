@@ -57,6 +57,8 @@ I am not responsible for any errors, mishaps, or damages that may occur from usi
 
 I used [pysonekyaw](https://github.com/pyesonekyaw)'s simulator as a boilerplate and improved it significantly, such as adding no-direction obstacles, being able to change the robot's starting position, and revamped the user interface to make it more modern and intuitive.
 
+Additionally, I would like to give special thanks to my Algorithm buddy (https://github.com/kenmoli), who have worked tirelessly to implement the features and refactor the code!
+
 # Related Repositories
 - [Algorithm](https://github.com/Awonnie/Algorithm-2.0)
 
