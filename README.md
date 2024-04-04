@@ -31,11 +31,11 @@ The app will be running at `localhost:3000`
 
 The interface is as intuitive as it can get. Position the robot where you want it to be and click on the buttons to add obstacles. Then click on `Submit` to find the path, or `Reset All` to clear the map and put the robot back to the starting position. `Reset Robot` just resets the robot to the starting position without clearing the map.
 
-<div style="text-align:center"><img src="/images/1.jpg" alt="Interface" width=350 ></div>
+<div style="text-align:center"><img src="/images/1.png" alt="Interface" width=350 ></div>
 
 You can drag and drop obstacles. Click on it multiple times to change direction.
 
-<div style="text-align:center"><img src="/images/3.jpg" alt="Interface" width=350 ></div>
+<div style="text-align:center"><img src="/images/3.png" alt="Interface" width=350 ></div>
 
 Use left panel to view the command list of instructions sent back to the RPI.
 
